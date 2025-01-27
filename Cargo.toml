@@ -1,0 +1,6 @@
+[package]
+name = "T6Training"
+version = "0.1.0"
+authors = ["Shawn Stickle"]
+license = "GNU GPLv3"
+edition = "2021"
