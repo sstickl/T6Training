@@ -3,8 +3,9 @@
     pub title: String,
     pub steps: Vec<String>,
 }*/ // DONT NEED IT
+use std::collections::HashMap;
 
-//Credit JDemler from StackOverflow for this macro
+//Credit JDemler from StackOverflow for this macro - you da real MVP
 macro_rules! vec_of_strings {
     ($($x:expr),*) => (vec![$($x.to_string()),*]);
 }
@@ -71,4 +72,22 @@ pub fn init_boldface_db() -> Vec<Vec<String>> {
         "EJECTION HANDLE - PULL"]);
 
     return emerg_ops
+}
+
+pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
+    let mut opdata_db: HashMap<String, HashMap<String, Vec<String>>> = HashMap::new();
+
+    opdata_db.insert("Engine".to_string(), {
+        let mut engine_ops = HashMap::new();
+        engine_ops.insert("Maximum Torque".to_string(), vec_of_strings![
+            "Takeoff / Max: _$100_%",
+            "Transient: _$132_% ( _$20_ ) seconds",
+            "Torque above _$102_% is indicative of a system malfunction"]);
+        engine_ops.insert("Maximum ITT".to_string(), vec_of_strings![
+            "Idle: _$750_°C",
+            "Takeoff / Max: _$820_°C",
+            "Transient:  _$821_ to _$870_°C ( _$20_ ) seconds"]);
+        engine_ops
+    });
+    return opdata_db
 }
