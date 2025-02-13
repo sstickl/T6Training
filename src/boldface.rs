@@ -87,7 +87,49 @@ pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
             "Idle: _$750_°C",
             "Takeoff / Max: _$820_°C",
             "Transient:  _$821_ to _$870_°C ( _$20_ ) seconds"]);
+        engine_ops.insert("N1".to_string(), vec_of_strings![
+            "Idle _$60_ to _$61_% Ground, _$67%_ (Min) Flight"]);
+        engine_ops.insert("Np".to_string(), vec_of_strings![
+            "Idle: _$46_ to _$50_%",
+            "Takeoff / Max: _$100_%, (_$100_% ± _$2_% PMU Off)",
+            "Avoid stabilized ground operations from _$62_ to _$80_% Np"]);
+        engine_ops.insert("Oil Pressure".to_string(), vec_of_strings![
+            "Takeoff / Max: _$90_ to _$120_PSI",
+            "Aerobatics / Spins: _$40_ to _$130_PSI",
+            "Aerobatics / Spins (Idle): _$15_ to _$40_PSI ( _$5_ ) Sec"]);
+        engine_ops.insert("Oil Temp".to_string(), vec_of_strings![
+            "Takeoff / Max: _$10_ to _$105_°C",
+            "Transient: _$106_ to _$110_°C ( _$10_ ) Min"]);
+        engine_ops.insert("Maximum Fuel Flow".to_string(), vec_of_strings![
+            "All phases of flight _$799_ PPH"]);
         engine_ops
     });
+
+    opdata_db.insert("Prohibited Manuevers".to_string(), {
+        let mut prohibited_manuevers = HashMap::new();
+        prohibited_manuevers.insert("Prohibited Manuevers".to_string(), vec_of_strings![
+            "1. _$Inverted_ Stalls",
+            "2. _$Inverted_ Spins",
+            "3. Aggravated _$spins past 2 turns_",
+            "4. Spins with the PCL _$above idle_",
+            "5. Spins with the _$landing gear_, _$flaps_, or _$speed brake_ extended",
+            "6. Spins with the _$PMU off",
+            "7. Spins below _$10,000_ feet pressure altitude",
+            "8. Spins above _$22,000_ feet pressure altitude",
+            "9. Abrupt _$cross-controlled (snap)_ maneuvers",
+            "10. Aerobatic maneuvers, spins, or stalls with greater than _$50_ pounds fuel imbalance",
+            "11. _$Tail_ spins."]);
+        prohibited_manuevers
+    });
+
+    opdata_db.insert("Airspeed Limitations".to_string(), {
+        let mut airspeed_limits = HashMap::new();
+        airspeed_limits.insert("Airspeed Limitations".to_string(), vec_of_strings![
+            "Max Airspeed Gear and/or Flaps _$150_ KIAS",
+            "Max Operating Speed _$316_ KIAS or _$0.67_ Mach",
+            "Full rudder deflection above _$150_ KIAS will exceed the limits of the rubber control system."]);
+        airspeed_limits
+    });
+
     return opdata_db
 }

@@ -34,8 +34,9 @@ pub fn label_textbox_question(ui: &mut egui::Ui, text: &str, answers: &mut Vec<S
 
         for section in sectional {
             if section.contains("$") {
-                let without_dollar = section.replace("$", "");
-                let _response = ui.add(egui::TextEdit::singleline(&mut answers[*answer_index as usize]).desired_width(50.0));
+                let _without_dollar = section.replace("$", "");
+                let answer_length = _without_dollar.len();
+                let _response = ui.add(egui::TextEdit::singleline(&mut answers[*answer_index as usize]).desired_width((answer_length*7) as f32));
                 *answer_index+=1;
             }else {
                 ui.add(egui::Label::new(section));

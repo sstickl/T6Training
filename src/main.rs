@@ -19,6 +19,7 @@ struct T6App{
     answers: Vec<String>,
     correct_answers: Vec<String>,
     answered: bool,
+    section: String,
 }
 
 #[derive(Default, PartialEq)]
@@ -33,7 +34,7 @@ impl eframe::App for T6App{ // Want our app to run off of eframe
     fn update(&mut self, ctx: &egui::Context, _frame: &mut Frame) {
         match self.current_screen {
             Screen::MainMenu => self.render_main_menu(ctx),
-            Screen::QuizScreen => self.render_queried_op_quizzer(ctx, "Maximum ITT"),
+            Screen::QuizScreen => self.render_queried_op_quizzer(ctx, self.section.to_string().as_str()),
             Screen::BoldFaceViewer => self.render_bf_viewer(ctx)
         }
     }
@@ -50,6 +51,7 @@ impl Default for T6App {
             answered: false,
             op_data: boldface::init_bf_opdata_db(),
             correct_answers: Vec::<String>::new(),
+            section: "Prohibited Manuevers".to_string(),
         }
     }
 }
@@ -75,9 +77,10 @@ impl T6App {
                     ui.style_mut().override_text_style = Some(egui::TextStyle::Monospace);
                     ui.spacing_mut().item_spacing.y = 30.0;
                     if ui.button("Random Quiz").clicked() {
-                        self.setup_queried_op_quizzer("Engine");
+                        self.setup_queried_op_quizzer(self.section.to_string().as_str());
                         self.current_screen = Screen::QuizScreen;
                     }
+                    let _response = ui.add(egui::TextEdit::singleline(&mut self.section).desired_width(80.0));
 
                     if ui.button("Boldface Viewer").clicked() {
                         self.current_screen = Screen::BoldFaceViewer;
