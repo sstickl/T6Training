@@ -1,9 +1,11 @@
 // LIBRARIES
 //use std::env;
 //use std::fs;
-use eframe::*;
+use eframe::{run_native, NativeOptions, CreationContext};
+//use eframe::egui;
 use egui::{CentralPanel, Ui};
 use std::collections::HashMap;
+//use image;
 
 // MODS
 mod boldface;
@@ -20,6 +22,8 @@ struct T6App{
     correct_answers: Vec<String>,
     answered: bool,
     section: String,
+    ops_section: boldface::BfOpdataEnum,
+    //image_texture: Option<egui::TextureId>,
 }
 
 #[derive(Default, PartialEq)]
@@ -31,10 +35,10 @@ enum Screen {
 }
 
 impl eframe::App for T6App{ // Want our app to run off of eframe
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         match self.current_screen {
             Screen::MainMenu => self.render_main_menu(ctx),
-            Screen::QuizScreen => self.render_queried_op_quizzer(ctx, self.section.to_string().as_str()),
+            Screen::QuizScreen => self.render_queried_op_quizzer(ctx, self.ops_section.as_str()),
             Screen::BoldFaceViewer => self.render_bf_viewer(ctx)
         }
     }
@@ -52,6 +56,8 @@ impl Default for T6App {
             op_data: boldface::init_bf_opdata_db(),
             correct_answers: Vec::<String>::new(),
             section: "Prohibited Manuevers".to_string(),
+            ops_section: boldface::BfOpdataEnum::Engine,
+            //image_texture: None,
         }
     }
 }
@@ -71,12 +77,20 @@ impl T6App {
                 ui.style_mut().text_styles.get_mut(&egui::TextStyle::Heading).unwrap().size = 32.0;
                 ui.heading("T6 Boldface Training App");
                 ui.add_space(50.0); // Adds 50 pixels of vertical space
+                
+                // Display the image
+                ui.add(
+                    egui::Image::new(egui::include_image!("T6RA.jpeg"))
+                        .max_height(200.0)
+                ).on_hover_text_at_pointer("T6 Photo by USAF MSgt David Richards");
+                ui.add_space(50.0); // Adds 50 pixels of vertical space
 
                 //Buttons
                 ui.scope(|ui| {
                     ui.style_mut().override_text_style = Some(egui::TextStyle::Monospace);
                     ui.spacing_mut().item_spacing.y = 30.0;
-                    if ui.button("Random Quiz").clicked() {
+                    if ui.button("Specific Quiz").clicked() {
+                        boldface::BfOpdataEnum::match_text(&mut self.ops_section,self.section.to_string().as_str());
                         self.setup_queried_op_quizzer(self.section.to_string().as_str());
                         self.current_screen = Screen::QuizScreen;
                     }
@@ -86,14 +100,16 @@ impl T6App {
                         self.current_screen = Screen::BoldFaceViewer;
                     }
                     if ui.button("Operational Data").clicked() {
-                        println!("Button 3 clicked!");
+                        self.setup_queried_op_quizzer(self.ops_section.as_str());
+                        println!("Section: {}", self.ops_section.as_str());
+                        self.current_screen = Screen::QuizScreen;
                     }
                 });
                 ui.allocate_space(ui.available_size());
              });
         });
     }
-    fn render_quiz_screen(&mut self, ctx: &egui::Context){
+    /*fn render_quiz_screen(&mut self, ctx: &egui::Context){
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             ui.heading("Quiz Screen");
 
@@ -117,7 +133,7 @@ impl T6App {
                 self.current_screen = Screen::MainMenu;
             }
         });
-    }
+    }*/
     fn render_bf_viewer(&mut self, ctx: &egui::Context){
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
 
@@ -142,22 +158,31 @@ impl T6App {
 
             ui.add_space(50.0); // Adds 50 pixels of vertical space
     
-            // Display multiple-choice options
-            if ui.button("Next Procedure").clicked() {
-                if self.boldface_number<9 { self.boldface_number+=1; self.hidden_display = [false, false, false].to_vec() }
-            }
-            if ui.button("Previous Procedure").clicked() {
-                if self.boldface_number>0 { self.boldface_number=1; self.hidden_display = [false, false, false].to_vec() }
-            }
-    
-            // Button to go back to the main menu
-            if ui.button("Back to Main Menu").clicked() {
-                self.boldface_number = 0;
-                self.current_screen = Screen::MainMenu;
-            }
+            ui.columns(3, |columns| {
+                columns[0].vertical_centered(|ui| {
+                    // Display multiple-choice options
+                    if ui.button("Next Procedure").clicked() {
+                        if self.boldface_number<9 { self.boldface_number+=1; self.hidden_display = [false, false, false].to_vec() }
+                    }
+                });
+                columns[1].vertical_centered(|ui| {
+                    // Display multiple-choice options
+                    if ui.button("Previous Procedure").clicked() {
+                        if self.boldface_number>0 { self.boldface_number=1; self.hidden_display = [false, false, false].to_vec() }
+                    }
+                });
+                columns[2].vertical_centered(|ui| {
+                    // Button to go back to the main menu
+                    if ui.button("Back to Main Menu").clicked() {
+                        self.boldface_number = 0;
+                        self.current_screen = Screen::MainMenu;
+                    }
+                });
+            });
         });
     }
-    fn render_op_quizzer(&mut self, ctx: &egui::Context){
+    
+    /*fn render_op_quizzer(&mut self, ctx: &egui::Context){
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             ui.heading("Operational Data Quizzer");
 
@@ -185,19 +210,25 @@ impl T6App {
                 self.current_screen = Screen::MainMenu;
             }
         });
-    }
+    }*/
+    
     fn setup_queried_op_quizzer(&mut self, query: &str){
         self.answers.clear();
         self.correct_answers.clear();
 
         let mut answer_index = 0;
+        let mut query_match = false;
 
             // Iterate through the outer HashMap
             for (category, subcategories) in &self.op_data {
+                if category.to_lowercase().contains(&query.to_lowercase()) {
+                    query_match = true;
+                    println!("Matched: {}", category);
+                }
                 // Iterate through the inner HashMap
                 for (subcategory, steps) in subcategories {
                     // Check if the subcategory matches the query
-                    if subcategory.to_lowercase().contains(&query.to_lowercase()) {
+                    if subcategory.to_lowercase().contains(&query.to_lowercase()) || query_match  {
     
                         // Display the steps
                         for step in steps {
@@ -224,33 +255,10 @@ impl T6App {
     }
 
     fn render_queried_op_quizzer(&mut self, ctx: &egui::Context, query: &str) {
-        CentralPanel::default().show(ctx, |ui: &mut Ui| {
-            ui.heading("Operational Data Quizzer");
-
-            let mut answer_index= 0;
-    
-            // Iterate through the outer HashMap
-            for (category, subcategories) in &self.op_data {
-                // Iterate through the inner HashMap
-                for (subcategory, steps) in subcategories {
-                    // Check if the subcategory matches the query
-                    if subcategory.to_lowercase().contains(&query.to_lowercase()) {
-                        ui.label(format!("Category: {}", category));
-                        ui.label(format!("Subcategory: {}", subcategory));
-                        ui.separator();
-    
-                        // Display the steps
-                        for step in steps {
-                            graphics::label_textbox_question(ui, step, &mut self.answers, &mut self.correct_answers, &mut answer_index);
-                        }
-                        ui.separator();
-                    }
-                }
-            }
+        egui::TopBottomPanel::bottom("bot_quiz_panel").show(ctx, |ui| {
     
             // Display multiple-choice options
             //graphics::label_textbox_question(ui, step, &mut self.answers);
-    
             // Button to check answers
             if ui.button("Check Answers").clicked() {
                 self.answered = true;
@@ -273,31 +281,67 @@ impl T6App {
                     ui.label("Incorrect!");
                 }
             }
+            if ui.button("Next Set").clicked() {
+                self.answered = false;
+                boldface::BfOpdataEnum::next(&mut self.ops_section);
+            }
+            if ui.button("Prev Set").clicked() {
+                self.answered = false;
+                boldface::BfOpdataEnum::prev(&mut self.ops_section);
+            }
     
             // Button to go back to the main menu
             if ui.button("Back to Main Menu").clicked() {
                 self.current_screen = Screen::MainMenu;
             }
         });
+
+        CentralPanel::default().show(ctx, |ui: &mut Ui| {
+            ui.heading("Operational Data Quizzer");
+            ui.heading(format!("Category: {}", self.ops_section.as_str()));
+            ui.separator();
+
+            let mut answer_index= 0;
+            let mut query_match = false;
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                // Iterate through the outer HashMap
+                for (category, subcategories) in &self.op_data {
+                    if category.to_lowercase().contains(&query.to_lowercase()) {
+                        query_match = true;
+                        //ui.heading(format!("Category: {}", category));
+                        //ui.separator();
+                        //println!("Matched: {}", category);
+                    }
+                    // Iterate through the inner HashMap
+                    for (subcategory, steps) in subcategories {
+                        // Check if the subcategory matches the query
+                        if subcategory.to_lowercase().contains(&query.to_lowercase()) || query_match {
+                            ui.label(format!("Subcategory: {}", subcategory));
+                            ui.separator();
+        
+                            // Display the steps
+                            for step in steps {
+                                graphics::label_textbox_question(ui, step, &mut self.answers, &mut answer_index);
+                            }
+                            ui.separator();
+                        }
+                    }
+                    query_match = false;
+                }
+            });
+        });
     }
 }
 
 
 fn main() -> eframe::Result<(), eframe::Error> {
-    /*let boldfaceops: Vec<Vec<String>> = boldface::init_boldface_db();
-
-    for emergencyop in boldfaceops.iter() {
-        println!("{}", emergencyop[0]);
-        
-        for step in emergencyop.iter().skip(1) {
-            println!("\t{}", step);
-        }
-    }*/
-
+    //egui app
     run_native(
         "T6 App", 
         NativeOptions::default(), 
-        Box::new(|_cc: &CreationContext<'_>| {
+        Box::new(|cc: &CreationContext<'_>| {
+            // This gives us image support:
+            egui_extras::install_image_loaders(&cc.egui_ctx);
             Ok(Box::<T6App>::default())
         }),
     )

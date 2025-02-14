@@ -6,5 +6,7 @@ license = "GNU GPLv3"
 edition = "2021"
 
 [dependencies]
-eframe = "*"
-egui = "*"
+eframe = "0.30.0"
+egui = "0.30.0"
+egui_extras = { version = "0.30.0",  features = ["default", "all_loaders"] }
+image = { version = "*",  features = ["jpeg", "png"] }

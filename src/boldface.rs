@@ -131,5 +131,183 @@ pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
         airspeed_limits
     });
 
+    opdata_db.insert("Starting".to_string(), {
+        let mut starting_limits = HashMap::new();
+        starting_limits.insert("Starting".to_string(), vec_of_strings![
+            "Starter Limit: _$20_ Seconds",
+            "Wait _$30_ Sec, _$2_ Min, _$5_ Min, _$30_ Min after each start/motoring attempt",
+            "Maximum ITT _$871_ to _$1000_ °C for _$5_ Sec (Do Not Attempt Restart)",
+            "Maximum Oil Pressure _$200_ PSI",
+            "Maximum Oil Temperature _$-40_ °C",
+            "Minimum Battery Voltage _$23.5_ V"]);
+        starting_limits
+    });
+
+    opdata_db.insert("Pressurization".to_string(), {
+        let mut pressurization_limits = HashMap::new();
+        pressurization_limits.insert("Pressurization".to_string(), vec_of_strings!(
+            "Normal Above 18,000 Ft MSL _$3.6_ ± _$0.2_ PSI",
+            "Overpressurization Safety Valve Opens _$5.0_ PSI"));
+        pressurization_limits
+    });
+
+    opdata_db.insert("Fuel".to_string(), {
+        let mut fuel_limits= HashMap::new();
+        fuel_limits.insert("Fuel".to_string(), vec_of_strings!(
+            "Normal Recovery Fuel _$200_ Pounds",
+            "Minimum Fuel _$150_ Pounds (_$200_ Pounds Solo",
+            "Emergency Fuel _$100_ Pounds",
+            "Minimum Fuel for Aerobatics _$150_ Pounds Per Side"));
+        fuel_limits
+    });
+
+    opdata_db.insert("Runway".to_string(), {
+        let mut runway_limits = HashMap::new();
+        runway_limits.insert("Runway".to_string(), vec_of_strings!(
+            "Maximum Landing Distance Available (LDA) _$4000_ Feet, or",
+            "heavy weight flaps _$up_ landing distance plus _$500_",
+            "feet, whichever is greater.",
+            "Minimum Runway Width _$75_ Feet"
+        ));
+        runway_limits
+    });
+
+    opdata_db.insert("Maximum Crosswinds".to_string(), {
+        let mut crosswind_limits = HashMap::new();
+        crosswind_limits.insert("Maximum Crosswinds".to_string(), vec_of_strings!(
+            "Dry Runway _$25_ Knots",
+            "Wet Runway _$10_ Knots",
+            "Icy Runway _$5_ Knots",
+            "Touch-and-Go _$20_ Knots",
+            "Formation Takeoff/Landing _$15_ Knots",
+            "Maximum Tailwind Component for Takeoff _$10_ Knots",
+            "Maximum Wind with Canopy Open _$40_ Knots"
+        ));
+        crosswind_limits
+    });
+
+    opdata_db.insert("Acceleration Limits".to_string(), {
+        let mut accel_limits = HashMap::new();
+        accel_limits.insert("Acceleration Limits".to_string(), vec_of_strings!(
+            "Symmetric Clean _$-3.5_ to _$7.0_ Gs",
+            "Symmetric Gear/Flaps _$0_ to _$2.5_ Gs",
+            "Asymmetric Clean _$-1.0_ to _$4.7_ Gs",
+            "Asymmetric Gear/Flaps _$0_ to _$2.0_ Gs"
+        ));
+        accel_limits
+    });
+
+    opdata_db.insert("Intentional Spin Entry".to_string(), {
+        let mut is_limits = HashMap::new();
+        is_limits.insert("Intentional Spin Entry".to_string(), vec_of_strings!(
+            "Minimum Altitude for Entry _$13,500_ Feet MSL",
+            "Minumum Cloud Clearence _$7,000_ Feet above clouds"
+        ));
+        is_limits
+    });
+
+    opdata_db.insert("Icing".to_string(), {
+        let mut icing_limits = HashMap::new();
+        icing_limits.insert("Icing".to_string(), vec_of_strings!(
+            "Maximum Icing Band _$5,000_ Feet",
+            "Maximum Icing Type _$Light Rime_"
+        ));
+        icing_limits
+    });
+
+    opdata_db.insert("Temperature".to_string(), {
+        let mut temp_limits = HashMap::new();
+        temp_limits.insert("Temperature".to_string(), vec_of_strings!(
+            "Ground operation is limited to ambient temperatures of _$-23_ to _$40_ °C"
+        ));
+        temp_limits
+    });
+
     return opdata_db
+}
+
+pub enum BfOpdataEnum{
+    Engine,
+    ProhibitedManuevers,
+    AirspeedLimitations,
+    Starting,
+    Pressurization,
+    Fuel,
+    Runway,
+    MaximumCrosswinds,
+    AccelerationLimits,
+    IntentionalSpinEntry,
+    Icing,
+    Temperature
+}
+
+impl BfOpdataEnum {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BfOpdataEnum::Engine => "Engine",
+            BfOpdataEnum::ProhibitedManuevers => "Prohibited Manuevers",
+            BfOpdataEnum::AirspeedLimitations => "Airspeed Limitations",
+            BfOpdataEnum::Starting => "Starting",
+            BfOpdataEnum::Pressurization => "Pressurization",
+            BfOpdataEnum::Fuel => "Fuel",
+            BfOpdataEnum::Runway => "Runway",
+            BfOpdataEnum::MaximumCrosswinds => "Maximum Crosswinds",
+            BfOpdataEnum::AccelerationLimits => "Acceleration Limits",
+            BfOpdataEnum::IntentionalSpinEntry => "Intentional Spin Entry",
+            BfOpdataEnum::Icing => "Icing",
+            BfOpdataEnum::Temperature => "Temperature"
+        }
+    }
+
+    pub fn next(&mut self) {
+        *self = match self {
+            BfOpdataEnum::Engine => BfOpdataEnum::ProhibitedManuevers,
+            BfOpdataEnum::ProhibitedManuevers => BfOpdataEnum::AirspeedLimitations,
+            BfOpdataEnum::AirspeedLimitations => BfOpdataEnum::Starting,
+            BfOpdataEnum::Starting => BfOpdataEnum::Pressurization,
+            BfOpdataEnum::Pressurization => BfOpdataEnum::Fuel,
+            BfOpdataEnum::Fuel => BfOpdataEnum::Runway,
+            BfOpdataEnum::Runway => BfOpdataEnum::MaximumCrosswinds,
+            BfOpdataEnum::MaximumCrosswinds => BfOpdataEnum::AccelerationLimits,
+            BfOpdataEnum::AccelerationLimits => BfOpdataEnum::IntentionalSpinEntry,
+            BfOpdataEnum::IntentionalSpinEntry => BfOpdataEnum::Icing,
+            BfOpdataEnum::Icing => BfOpdataEnum::Temperature,
+            BfOpdataEnum::Temperature => BfOpdataEnum::Engine
+        }
+    }
+
+    pub fn prev(&mut self) {
+        *self = match self {
+            BfOpdataEnum::Engine => BfOpdataEnum::Temperature,
+            BfOpdataEnum::ProhibitedManuevers => BfOpdataEnum::Engine,
+            BfOpdataEnum::AirspeedLimitations => BfOpdataEnum::ProhibitedManuevers,
+            BfOpdataEnum::Starting => BfOpdataEnum::AirspeedLimitations,
+            BfOpdataEnum::Pressurization => BfOpdataEnum::Starting,
+            BfOpdataEnum::Fuel => BfOpdataEnum::Pressurization,
+            BfOpdataEnum::Runway => BfOpdataEnum::Fuel,
+            BfOpdataEnum::MaximumCrosswinds => BfOpdataEnum::Runway,
+            BfOpdataEnum::AccelerationLimits => BfOpdataEnum::MaximumCrosswinds,
+            BfOpdataEnum::IntentionalSpinEntry => BfOpdataEnum::AccelerationLimits,
+            BfOpdataEnum::Icing => BfOpdataEnum::IntentionalSpinEntry,
+            BfOpdataEnum::Temperature => BfOpdataEnum::Icing
+        }
+    }
+
+    pub fn match_text(&mut self, text: &str) {
+        *self = match text {
+            "Engine" => BfOpdataEnum::Engine,
+            "Prohibited Manuevers" => BfOpdataEnum::ProhibitedManuevers,
+            "Airspeed Limitations" => BfOpdataEnum::AirspeedLimitations,
+            "Starting" => BfOpdataEnum::Starting,
+            "Pressurization" => BfOpdataEnum::Pressurization,
+            "Fuel" => BfOpdataEnum::Fuel,
+            "Runway" => BfOpdataEnum::Runway,
+            "Maximum Crosswinds" => BfOpdataEnum::MaximumCrosswinds,
+            "Acceleration Limits" => BfOpdataEnum::AccelerationLimits,
+            "Intentional Spin Entry" => BfOpdataEnum::IntentionalSpinEntry,
+            "Icing" => BfOpdataEnum::Icing,
+            "Temperature" => BfOpdataEnum::Temperature,
+            _ => BfOpdataEnum::Engine
+        }
+    }
 }

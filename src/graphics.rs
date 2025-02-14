@@ -1,3 +1,5 @@
+//use egui::{*};
+
 //A custom widget for a hidden label that reveals text when clicked.
 pub fn hidden_label(ui: &mut egui::Ui, text: &str, is_revealed: &mut bool) {
     egui::Frame::none() //actually, let's test this later.. I think we don't need the frame anymore since we're not using a label now
@@ -28,7 +30,7 @@ pub fn hidden_label(ui: &mut egui::Ui, text: &str, is_revealed: &mut bool) {
     });
 }
 
-pub fn label_textbox_question(ui: &mut egui::Ui, text: &str, answers: &mut Vec<String>, correct_answers: &mut Vec<String>, answer_index: &mut i32) {
+pub fn label_textbox_question(ui: &mut egui::Ui, text: &str, answers: &mut Vec<String>, answer_index: &mut i32) {
     ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
         let sectional = text.split("_");
 
