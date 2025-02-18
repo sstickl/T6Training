@@ -226,6 +226,7 @@ pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
     return opdata_db
 }
 
+#[derive(PartialEq)]
 pub enum BfOpdataEnum{
     Engine,
     ProhibitedManuevers,

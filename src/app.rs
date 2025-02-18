@@ -1,6 +1,7 @@
 use egui::{CentralPanel, Ui};
 use std::collections::HashMap;
 
+use crate::boldface::BfOpdataEnum;
 use crate::graphics;
 use crate::boldface;
 
@@ -23,8 +24,9 @@ pub struct T6App{
     answers: Vec<String>,               //Tracks the answers given to the current quiz
     correct_answers: Vec<String>,       //Tracks the correct answers to the current quiz
     answered: bool,                     //Tracks whether the current quiz screen has been answered.
-    section: String,                    //Tracks the section desired for the ops_data quiz
+    //section: String,                    //Tracks the section desired for the ops_data quiz
     ops_section: boldface::BfOpdataEnum,    //Tracks the section desired for the ops_data quiz
+    //ops_section_2: boldface::BfOpdataEnum,
 }
 
 impl eframe::App for T6App{ // Want our app to run off of eframe
@@ -56,8 +58,9 @@ impl Default for T6App {
             answered: false,                //default quiz screen to not answered
             op_data: boldface::init_bf_opdata_db(), //init boldface ops db
             correct_answers: Vec::<String>::new(),  //we're not sure how many correct ans
-            section: "Engine".to_string(),    //default ops data to engine/first section
+            //section: "Engine".to_string(),    //default ops data to engine/first section
             ops_section: boldface::BfOpdataEnum::Engine,    //default ops data to engine/first section
+            //ops_section_2: boldface::BfOpdataEnum::Engine,
         }
     }
 }
@@ -100,20 +103,41 @@ impl T6App {
                 ui.scope(|ui| {
                     //ui.style_mut().override_text_style = Some(egui::TextStyle::Monospace);
                     ui.spacing_mut().item_spacing.y = 30.0;
+                    
                     if ui.button("Specific Quiz").clicked() {
-                        boldface::BfOpdataEnum::match_text(&mut self.ops_section,self.section.to_string().as_str());
-                        self.setup_queried_op_quizzer(self.section.to_string().as_str());
+                        //boldface::BfOpdataEnum::match_text(&mut self.ops_section,self.section.to_string().as_str());
+                        self.setup_queried_op_quizzer(self.ops_section.as_str());
                         self.current_screen = Screen::QuizScreen;
                     }
-                    let _response = ui.add(egui::TextEdit::singleline(&mut self.section).desired_width(80.0));
+                    ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
+                        ui.add(egui::Label::new("Choose section for Quiz:"));
+                        //let _response = ui.add(egui::TextEdit::singleline(&mut self.section).desired_width(80.0));
+                        egui::ComboBox::from_label("")
+                            .selected_text(format!("{}", self.ops_section.as_str()))
+                            .show_ui(ui, |ui| {
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::Engine, "Engine");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::ProhibitedManuevers, "Prohibited Manuevers");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::AirspeedLimitations, "Airspeed Limitations");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::Starting, "Starting");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::Pressurization, "Pressurization");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::Fuel, "Fuel");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::Runway, "Runway");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::MaximumCrosswinds, "Maximum Crosswinds");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::AccelerationLimits, "Acceleration Limits");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::IntentionalSpinEntry, "Intentional Spin Entry");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::Icing, "Icing");
+                                ui.selectable_value(&mut self.ops_section, BfOpdataEnum::Temperature, "Temperature");
+                            });
+                    });
+                    //println!("Ops section selected:{}", self.ops_section.as_str());
 
                     if ui.button("Boldface Viewer").clicked() {
                         self.current_screen = Screen::BoldFaceViewer;
                     }
-                    if ui.button("Operational Data").clicked() {
-                        self.setup_queried_op_quizzer(self.ops_section.as_str());
-                        println!("Section: {}", self.ops_section.as_str());
-                        self.current_screen = Screen::QuizScreen;
+                    if ui.button("Operational Data (Not yet implemented)").clicked() {
+                        //self.setup_queried_op_quizzer(self.ops_section.as_str());
+                        //println!("Section: {}", self.ops_section.as_str());
+                        //self.current_screen = Screen::QuizScreen;
                     }
                 });
                 ui.allocate_space(ui.available_size());
@@ -168,6 +192,7 @@ impl T6App {
             ui.scope(|ui| {
                 ui.set_min_height(35.0);
                 ui.label(format!("Boldface for: {}", self.boldface_ops[self.boldface_number][0]));
+                ui.label(format!("Click black boxes to reveal step"));
             });
             ui.separator();
             ui.scope(|ui| {
@@ -194,7 +219,7 @@ impl T6App {
             for (category, subcategories) in &self.op_data {
                 if category.to_lowercase().contains(&query.to_lowercase()) {
                     query_match = true;
-                    println!("Matched: {}", category);
+                    //println!("Matched: {}", category);
                 }
                 // Iterate through the inner HashMap
                 for (subcategory, steps) in subcategories {
@@ -208,7 +233,7 @@ impl T6App {
                                 if section.contains("$") {
                                     let without_dollar = section.replace("$", "");
                                     if answer_index >= self.correct_answers.len() {
-                                        println!("Correct Answer: {}", without_dollar);
+                                        //println!("Correct Answer: {}", without_dollar);
                                         self.correct_answers.push(without_dollar);
                                         
                                     }
@@ -258,6 +283,7 @@ impl T6App {
                 columns[3].vertical_centered(|ui| {
                     // Button to go back to the main menu
                     if ui.button("Back to Main Menu").clicked() {
+                        self.answered = false;
                         self.current_screen = Screen::MainMenu;
                     }
                 });
