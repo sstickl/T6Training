@@ -38,8 +38,33 @@ pub fn label_textbox_question(ui: &mut egui::Ui, text: &str, answers: &mut Vec<S
             if section.contains("$") {
                 let _without_dollar = section.replace("$", "");
                 let answer_length = _without_dollar.len();
-                let _response = ui.add(egui::TextEdit::singleline(&mut answers[*answer_index as usize]).desired_width((answer_length*7) as f32));
-                *answer_index+=1;
+                if !((*answer_index as usize) > answers.len()-1) {
+                    let _response = ui.add(egui::TextEdit::singleline(&mut answers[*answer_index as usize]).desired_width((answer_length*7) as f32));
+                    *answer_index+=1;
+                }
+            }else {
+                ui.add(egui::Label::new(section));
+            }
+        }
+    });
+}
+
+pub fn label_answered_question(ui: &mut egui::Ui, text: &str, answers: &mut Vec<String>, answer_index: &mut i32, correct_answers: &mut Vec<String>) {
+    ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
+        let sectional = text.split("_");
+
+        for section in sectional {
+            if section.contains("$") {
+                let _without_dollar = section.replace("$", "");
+                let answer_length = _without_dollar.len();           
+                if !((*answer_index as usize) > answers.len()-1) {
+                    if answers[*answer_index as usize] == correct_answers[*answer_index as usize] {
+                        let _response = ui.add(egui::TextEdit::singleline(&mut answers[*answer_index as usize]).desired_width((answer_length*7) as f32).background_color(egui::Color32::from_rgb(0, 255,0)));
+                    } else {
+                        let _response = ui.add(egui::TextEdit::singleline(&mut answers[*answer_index as usize]).desired_width((answer_length*7) as f32).background_color(egui::Color32::from_rgb(255, 0,0)));
+                    }
+                    *answer_index+=1;
+                }
             }else {
                 ui.add(egui::Label::new(section));
             }
