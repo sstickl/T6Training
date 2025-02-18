@@ -3209,6 +3209,8 @@ dependencies = [
  "egui",
  "egui_extras",
  "image",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

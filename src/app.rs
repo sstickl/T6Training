@@ -63,6 +63,21 @@ impl Default for T6App {
 }
 
 impl T6App {
+    /// Called once before the first frame.
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        // This is also where you can customize the look and feel of egui using
+        // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
+
+        // Load previous app state (if any).
+        // Note that you must enable the `persistence` feature for this to work.
+        if let Some(storage) = cc.storage {
+            ;
+            //return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+        }
+
+        Default::default()
+    }
+
     fn render_main_menu(&mut self, ctx: &egui::Context){
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui|
@@ -72,12 +87,14 @@ impl T6App {
                 ui.heading("T6 Boldface Training App");
                 ui.add_space(50.0); // Adds 50 pixels of vertical space
                 
+                #[cfg(not(target_arch = "wasm32"))]{
                 // Display the T6RA image
                 ui.add(
                     egui::Image::new(egui::include_image!("res/T6RA.jpeg"))
                         .max_height(200.0)
                 ).on_hover_text_at_pointer("T6 Photo by USAF MSgt David Richards");
                 ui.add_space(50.0); // Adds 50 pixels of vertical space after
+                }
 
                 //Buttons
                 ui.scope(|ui| {
