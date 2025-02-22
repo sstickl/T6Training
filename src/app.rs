@@ -27,6 +27,7 @@ pub struct T6App{
     //section: String,                    //Tracks the section desired for the ops_data quiz
     ops_section: boldface::BfOpdataEnum,    //Tracks the section desired for the ops_data quiz
     //ops_section_2: boldface::BfOpdataEnum,
+    //display_correct: bool,              //Tracks whether the answers should be displayed
 }
 
 impl eframe::App for T6App{ // Want our app to run off of eframe
@@ -61,6 +62,7 @@ impl Default for T6App {
             //section: "Engine".to_string(),    //default ops data to engine/first section
             ops_section: boldface::BfOpdataEnum::Engine,    //default ops data to engine/first section
             //ops_section_2: boldface::BfOpdataEnum::Engine,
+            //display_correct: false,
         }
     }
 }
@@ -90,14 +92,14 @@ impl T6App {
                 ui.heading("T6 Boldface Training App");
                 ui.add_space(50.0); // Adds 50 pixels of vertical space
                 
-                #[cfg(not(target_arch = "wasm32"))]{
+                //#[cfg(not(target_arch = "wasm32"))]{
                 // Display the T6RA image
                 ui.add(
-                    egui::Image::new(egui::include_image!("res/T6RA.jpeg"))
+                    egui::Image::new(egui::include_image!("../assets/T6RA.jpeg"))
                         .max_height(200.0)
                 ).on_hover_text_at_pointer("T6 Photo by USAF MSgt David Richards");
                 ui.add_space(50.0); // Adds 50 pixels of vertical space after
-                }
+                //}
 
                 //Buttons
                 ui.scope(|ui| {
@@ -210,7 +212,9 @@ impl T6App {
     
     fn setup_queried_op_quizzer(&mut self, query: &str){
         self.answers.clear();
+        self.answered = false;
         self.correct_answers.clear();
+        //self.display_correct = false;
 
         let mut answer_index = 0;
         let mut query_match = false;
@@ -268,14 +272,14 @@ impl T6App {
                 });
                 columns[1].vertical_centered(|ui| {
                     if ui.button("Next Set").clicked() {
-                        self.answered = false;
+                        //self.answered = false;
                         boldface::BfOpdataEnum::next(&mut self.ops_section);
                         self.setup_queried_op_quizzer(&self.ops_section.as_str());
                     }
                 });
                 columns[2].vertical_centered(|ui| {
                     if ui.button("Prev Set").clicked() {
-                        self.answered = false;
+                        //self.answered = false;
                         boldface::BfOpdataEnum::prev(&mut self.ops_section);
                         self.setup_queried_op_quizzer(self.ops_section.as_str());
                     }
@@ -296,25 +300,31 @@ impl T6App {
             ui.heading(format!("Category: {}", self.ops_section.as_str()));
 
             ui.add_space(20.0);
-            if self.answered {
-                let mut correct = true;
-                for (answer, correct_answer) in self.answers.iter().zip(self.correct_answers.iter()) {
-                    if answer != correct_answer {
-                        correct = false;
-                        break;
+            ui.horizontal( |ui|{
+                if self.answered {
+                    let mut correct = true;
+                    for (answer, correct_answer) in self.answers.iter().zip(self.correct_answers.iter()) {
+                        if answer != correct_answer {
+                            correct = false;
+                            break;
+                        }
                     }
+                    if correct == true {
+                        //ui.label("Answers were correct!");
+                        ui.label(egui::RichText::new("Answers were correct").background_color(egui::Color32::from_rgb(0, 255, 0)));
+                    } else {
+                        ui.label(egui::RichText::new("Answers were incorrect!").background_color(egui::Color32::from_rgb(255,0, 0)));
+                        if ui.small_button("Display Correct Answers").clicked() {
+                            for (index, correct_answer) in self.correct_answers.iter().enumerate() {
+                                self.answers[index] = correct_answer.clone();
+                            }
+                        }
+                    } 
                 }
-                if correct == true {
-                    //ui.label("Answers were correct!");
-                    ui.label(egui::RichText::new("Answers were correct").background_color(egui::Color32::from_rgb(0, 255, 0)));
-                } else {
-                    ui.label(egui::RichText::new("Answers were incorrect!").background_color(egui::Color32::from_rgb(255,0, 0)));;
-                } 
-                
-            }
-            else {
-                ui.label("Answers not yet checked.");
-            }
+                else {
+                    ui.label("Answers not yet checked.");
+                }
+            });
             ui.separator();
 
             let mut answer_index= 0;
@@ -332,6 +342,7 @@ impl T6App {
                         if subcategory.to_lowercase().contains(&query.to_lowercase()) || query_match {
                             ui.label(format!("Subcategory: {}", subcategory));
                             ui.separator();
+                            ui.add_space(5.0);
         
                             // Display the steps with fill-in textboxes
                             for step in steps {
@@ -342,6 +353,7 @@ impl T6App {
                                     graphics::label_answered_question(ui, step, &mut self.answers, &mut answer_index, &mut self.correct_answers);    
                                 }
                             }
+                            ui.add_space(5.0);
                             ui.separator();
                         }
                     }
