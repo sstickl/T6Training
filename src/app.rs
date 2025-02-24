@@ -125,7 +125,7 @@ impl T6App {
                                     );
                                     ui.selectable_value(
                                         &mut self.ops_section,
-                                        BfOpdataEnum::ProhibitedManuevers,
+                                        BfOpdataEnum::ProhibitedManeuvers,
                                         "Prohibited Manuevers",
                                     );
                                     ui.selectable_value(

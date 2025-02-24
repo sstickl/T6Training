@@ -121,9 +121,9 @@ pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
         engine_ops
     });
 
-    opdata_db.insert("Prohibited Manuevers".to_string(), {
-        let mut prohibited_manuevers = HashMap::new();
-        prohibited_manuevers.insert("Prohibited Manuevers".to_string(), vec_of_strings![
+    opdata_db.insert("Prohibited Maneuvers".to_string(), {
+        let mut prohibited_maneuvers = HashMap::new();
+        prohibited_maneuvers.insert("Prohibited Maneuvers".to_string(), vec_of_strings![
             "1. _$Inverted_ Stalls", 
             "2. _$Inverted_ Spins", 
             "3. Aggravated _$spins past 2 turns_", 
@@ -136,7 +136,7 @@ pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
             "10. Aerobatic maneuvers, spins, or stalls with greater than _$50_ pounds fuel imbalance", 
             "11. _$Tail_ spins."
         ]);
-        prohibited_manuevers
+        prohibited_maneuvers
     });
 
     opdata_db.insert("Airspeed Limitations".to_string(), {
@@ -276,7 +276,7 @@ pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
 #[derive(PartialEq)]
 pub enum BfOpdataEnum {
     Engine,
-    ProhibitedManuevers,
+    ProhibitedManeuvers,
     AirspeedLimitations,
     Starting,
     Pressurization,
@@ -295,7 +295,7 @@ impl BfOpdataEnum {
     pub fn as_str(&self) -> &'static str {
         match self {
             BfOpdataEnum::Engine => "Engine",
-            BfOpdataEnum::ProhibitedManuevers => "Prohibited Manuevers",
+            BfOpdataEnum::ProhibitedManeuvers => "Prohibited Manuevers",
             BfOpdataEnum::AirspeedLimitations => "Airspeed Limitations",
             BfOpdataEnum::Starting => "Starting",
             BfOpdataEnum::Pressurization => "Pressurization",
@@ -312,8 +312,8 @@ impl BfOpdataEnum {
     // Go to the next BfOpdataEnum
     pub fn next(&mut self) {
         *self = match self {
-            BfOpdataEnum::Engine => BfOpdataEnum::ProhibitedManuevers,
-            BfOpdataEnum::ProhibitedManuevers => BfOpdataEnum::AirspeedLimitations,
+            BfOpdataEnum::Engine => BfOpdataEnum::ProhibitedManeuvers,
+            BfOpdataEnum::ProhibitedManeuvers => BfOpdataEnum::AirspeedLimitations,
             BfOpdataEnum::AirspeedLimitations => BfOpdataEnum::Starting,
             BfOpdataEnum::Starting => BfOpdataEnum::Pressurization,
             BfOpdataEnum::Pressurization => BfOpdataEnum::Fuel,
@@ -331,8 +331,8 @@ impl BfOpdataEnum {
     pub fn prev(&mut self) {
         *self = match self {
             BfOpdataEnum::Engine => BfOpdataEnum::Temperature,
-            BfOpdataEnum::ProhibitedManuevers => BfOpdataEnum::Engine,
-            BfOpdataEnum::AirspeedLimitations => BfOpdataEnum::ProhibitedManuevers,
+            BfOpdataEnum::ProhibitedManeuvers => BfOpdataEnum::Engine,
+            BfOpdataEnum::AirspeedLimitations => BfOpdataEnum::ProhibitedManeuvers,
             BfOpdataEnum::Starting => BfOpdataEnum::AirspeedLimitations,
             BfOpdataEnum::Pressurization => BfOpdataEnum::Starting,
             BfOpdataEnum::Fuel => BfOpdataEnum::Pressurization,
