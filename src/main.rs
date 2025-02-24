@@ -36,7 +36,6 @@ fn main() -> eframe::Result<(), eframe::Error> {
 // When compiling to web using trunk:
 #[cfg(target_arch = "wasm32")]
 fn main() {
-    use app::T6App;
     use eframe::wasm_bindgen::JsCast as _;
 
     // Redirect `log` message to `console.log` and friends:
@@ -62,9 +61,9 @@ fn main() {
                 web_options,
                 Box::new(|cc: &eframe::CreationContext<'_>| {
                     egui_extras::install_image_loaders(&cc.egui_ctx); // This gives us image support:
-                    let _style = Style {
-                        visuals: Visuals::dark(),
-                        ..Style::default()
+                    let _style = egui::Style {
+                        visuals: egui::Visuals::dark(),
+                        ..egui::Style::default()
                     };
                     Ok(Box::<app::T6App>::default())
                 }),

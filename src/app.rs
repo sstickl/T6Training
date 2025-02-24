@@ -84,6 +84,7 @@ impl T6App {
                     ui.add_space(50.0); // Adds 50 pixels of vertical space
 
                     // Display the T6RA image. Works on everything but Safari for some reason.
+                    //.max_height(ctx.screen_rect().height() / 3.0),
                     ui.add(
                         egui::Image::new(egui::include_image!("../assets/T6RA.jpeg"))
                             .max_height(200.0),
@@ -115,7 +116,7 @@ impl T6App {
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
                             ui.add(egui::Label::new("Choose section for Ops Data:"));
                             egui::ComboBox::from_label("")
-                                .selected_text(self.ops_section.as_str())
+                                .selected_text(self.ops_section.as_str().to_string())
                                 .show_ui(ui, |ui| {
                                     ui.selectable_value(
                                         &mut self.ops_section,
@@ -209,20 +210,6 @@ impl T6App {
                     }
                 });
                 columns[1].vertical_centered(|ui| {
-                    if ui.button("Next Procedure").clicked() {
-                        // Ensure we don't overflow
-                        if self.boldface_number < 9 {
-                            self.boldface_number += 1;
-                            self.hidden_display = [false, false, false].to_vec()
-                        }
-                        // Wrap around if needed
-                        else {
-                            self.boldface_number = 0;
-                            self.hidden_display = [false, false, false].to_vec()
-                        }
-                    }
-                });
-                columns[2].vertical_centered(|ui| {
                     if ui.button("Previous Procedure").clicked() {
                         // Ensure we don't underflow
                         if self.boldface_number > 0 {
@@ -232,6 +219,20 @@ impl T6App {
                         // Wrap around if needed
                         else {
                             self.boldface_number = 9;
+                            self.hidden_display = [false, false, false].to_vec()
+                        }
+                    }
+                });
+                columns[2].vertical_centered(|ui| {
+                    if ui.button("Next Procedure").clicked() {
+                        // Ensure we don't overflow
+                        if self.boldface_number < 9 {
+                            self.boldface_number += 1;
+                            self.hidden_display = [false, false, false].to_vec()
+                        }
+                        // Wrap around if needed
+                        else {
+                            self.boldface_number = 0;
                             self.hidden_display = [false, false, false].to_vec()
                         }
                     }
@@ -337,7 +338,7 @@ impl T6App {
         // Check Answers, Next Set, Previous Set, Back to Main Menu
         egui::TopBottomPanel::bottom("bot_quiz_panel").show(ctx, |ui| {
             ui.add_space(20.0); // Adds 50 pixels of vertical space
-            ui.columns(4, |columns| {
+            ui.columns(5, |columns| {
                 columns[0].vertical_centered(|ui| {
                     // Button to check answers
                     if ui.button("Check Answers").clicked() {
@@ -345,18 +346,24 @@ impl T6App {
                     }
                 });
                 columns[1].vertical_centered(|ui| {
-                    if ui.button("Next Set").clicked() {
-                        boldface::BfOpdataEnum::next(&mut self.ops_section);
-                        self.setup_queried_op_quizzer(self.ops_section.as_str());
-                    }
-                });
-                columns[2].vertical_centered(|ui| {
                     if ui.button("Prev Set").clicked() {
                         boldface::BfOpdataEnum::prev(&mut self.ops_section);
                         self.setup_queried_op_quizzer(self.ops_section.as_str());
                     }
                 });
+                columns[2].vertical_centered(|ui| {
+                    if ui.button("Next Set").clicked() {
+                        boldface::BfOpdataEnum::next(&mut self.ops_section);
+                        self.setup_queried_op_quizzer(self.ops_section.as_str());
+                    }
+                });
                 columns[3].vertical_centered(|ui| {
+                    if ui.button("Data Viewer").clicked() {
+                        self.answered = false;
+                        self.current_screen = Screen::OpsDataViewer;
+                    }
+                });
+                columns[4].vertical_centered(|ui| {
                     // Button to go back to the main menu
                     if ui.button("Back to Main Menu").clicked() {
                         self.answered = false;
@@ -373,7 +380,7 @@ impl T6App {
             ui.heading("Operational Data Quizzer");
             ui.heading(format!("Category: {}", self.ops_section.as_str()));
 
-            ui.add_space(20.0);
+            ui.add_space(5.0);
 
             // Check if the answers are answered/correct, allow the user to correct answers
             // Rendered in a ui.horizontal to ensure UI stays the correct size no matter what
@@ -472,18 +479,21 @@ impl T6App {
                 columns[0].vertical_centered(|ui| {
                     // Button to check answers
                     if ui.button("Convert to Quiz").clicked() {
+                        for answer in self.answers.iter_mut() {
+                            *answer = "".to_string()
+                        }
                         self.current_screen = Screen::OpsQuiz;
                     }
                 });
                 columns[1].vertical_centered(|ui| {
-                    if ui.button("Next Set").clicked() {
-                        boldface::BfOpdataEnum::next(&mut self.ops_section);
+                    if ui.button("Prev Set").clicked() {
+                        boldface::BfOpdataEnum::prev(&mut self.ops_section);
                         self.setup_queried_op_quizzer(self.ops_section.as_str());
                     }
                 });
                 columns[2].vertical_centered(|ui| {
-                    if ui.button("Prev Set").clicked() {
-                        boldface::BfOpdataEnum::prev(&mut self.ops_section);
+                    if ui.button("Next Set").clicked() {
+                        boldface::BfOpdataEnum::next(&mut self.ops_section);
                         self.setup_queried_op_quizzer(self.ops_section.as_str());
                     }
                 });
@@ -503,7 +513,7 @@ impl T6App {
             ui.heading("Operational Data Viewer");
             ui.heading(format!("Category: {}", self.ops_section.as_str()));
 
-            ui.add_space(20.0);
+            ui.add_space(5.0);
 
             // Hopefully this will keep it the correct size if you convert it to a quiz
             ui.horizontal(|ui| {

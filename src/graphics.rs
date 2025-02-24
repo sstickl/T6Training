@@ -173,7 +173,7 @@ pub fn label_answered_question(
 pub fn label_ops_data(
     ui: &mut egui::Ui,
     text: &str,
-    answers: &mut [String],
+    _answers: &mut [String],
     answer_index: &mut i32,
     correct_answers: &mut [String],
 ) {
@@ -195,8 +195,7 @@ pub fn label_ops_data(
                     let _without_dollar = section.replace("$", "");
 
                     // Check if the answer index is within the bounds of the answers vector, and if so, create a textbox for the answer and outline if it's correct or not
-                    // Could save a line in the future by just changing the stroke based on the if statement
-                    if (*answer_index as usize) > answers.len() {
+                    if (*answer_index as usize) < correct_answers.len() {
                         ui.add(egui::Label::new(format!(
                             " * {} * ",
                             correct_answers[*answer_index as usize]
