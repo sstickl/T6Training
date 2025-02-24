@@ -1,23 +1,16 @@
-// LIBRARIES
-//use eframe::{run_native, CreationContext};
-//use egui::{CentralPanel, Ui};
-//use std::collections::HashMap;
-
 // MODS
-mod app;
-mod graphics;
-mod boldface;
-
-// Structs
-
+mod app; // The main app
+mod boldface; // The boldface ops/procedures
+mod graphics; // The graphics, holds widgets, various graphics things
 
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
-fn main() -> eframe::Result<(), eframe::Error> {    //egui app
+fn main() -> eframe::Result<(), eframe::Error> {
     //setup our native options
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_icon( //add our icon
+            //add our icon
+            .with_icon(
                 eframe::icon_data::from_png_bytes(&include_bytes!("../assets/T6T.png")[..])
                     .expect("Failed to load icon"),
             ),
@@ -26,10 +19,15 @@ fn main() -> eframe::Result<(), eframe::Error> {    //egui app
 
     //run the app native
     eframe::run_native(
-        "T6 App", 
-        native_options, 
+        "T6 App",
+        native_options,
         Box::new(|cc: &eframe::CreationContext<'_>| {
-            egui_extras::install_image_loaders(&cc.egui_ctx);   // This gives us image support:
+            egui_extras::install_image_loaders(&cc.egui_ctx); // This gives us image support:
+            let _style = egui::Style {
+                //need to fix this so the app configures for dark/light
+                visuals: egui::Visuals::light(),
+                ..egui::Style::default()
+            };
             Ok(Box::<app::T6App>::default())
         }),
     )
@@ -63,7 +61,11 @@ fn main() {
                 canvas,
                 web_options,
                 Box::new(|cc: &eframe::CreationContext<'_>| {
-                    egui_extras::install_image_loaders(&cc.egui_ctx);   // This gives us image support:
+                    egui_extras::install_image_loaders(&cc.egui_ctx); // This gives us image support:
+                    let _style = Style {
+                        visuals: Visuals::dark(),
+                        ..Style::default()
+                    };
                     Ok(Box::<app::T6App>::default())
                 }),
             )

@@ -1,6 +1,6 @@
 [package]
 name = "t6_training"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Shawn Stickle"]
 license = "GNU GPLv3"
 edition = "2021"
