@@ -3203,12 +3203,14 @@ dependencies = [
 
 [[package]]
 name = "t6_training"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "eframe",
  "egui",
  "egui_extras",
  "image",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

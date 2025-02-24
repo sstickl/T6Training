@@ -1,37 +1,88 @@
-// LIBRARIES
-use eframe::{run_native, CreationContext};
-//use egui::{CentralPanel, Ui};
-//use std::collections::HashMap;
-
 // MODS
-mod app;
-mod graphics;
-mod boldface;
-
-// Structs
-
+mod app; // The main app
+mod boldface; // The boldface ops/procedures
+mod graphics; // The graphics, holds widgets, various graphics things
 
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
-fn main() -> eframe::Result<(), eframe::Error> {    //egui app
+fn main() -> eframe::Result<(), eframe::Error> {
     //setup our native options
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_icon( //add our icon
-                eframe::icon_data::from_png_bytes(&include_bytes!("res/T6T.png")[..])
+            //add our icon
+            .with_icon(
+                eframe::icon_data::from_png_bytes(&include_bytes!("../assets/T6T.png")[..])
                     .expect("Failed to load icon"),
             ),
         ..Default::default()
     };
 
     //run the app native
-    run_native(
-        "T6 App", 
-        native_options, 
-        Box::new(|cc: &CreationContext<'_>| {
-            egui_extras::install_image_loaders(&cc.egui_ctx);   // This gives us image support:
+    eframe::run_native(
+        "T6 App",
+        native_options,
+        Box::new(|cc: &eframe::CreationContext<'_>| {
+            egui_extras::install_image_loaders(&cc.egui_ctx); // This gives us image support:
+            let _style = egui::Style {
+                //need to fix this so the app configures for dark/light
+                visuals: egui::Visuals::light(),
+                ..egui::Style::default()
+            };
             Ok(Box::<app::T6App>::default())
         }),
     )
 }
 
+// When compiling to web using trunk:
+#[cfg(target_arch = "wasm32")]
+fn main() {
+    use eframe::wasm_bindgen::JsCast as _;
+
+    // Redirect `log` message to `console.log` and friends:
+    //eframe::WebLogger::init(log::LevelFilter::Debug).ok();
+
+    let web_options = eframe::WebOptions::default();
+
+    wasm_bindgen_futures::spawn_local(async {
+        let document = web_sys::window()
+            .expect("No window")
+            .document()
+            .expect("No document");
+
+        let canvas = document
+            .get_element_by_id("the_canvas_id")
+            .expect("Failed to find the_canvas_id")
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .expect("the_canvas_id was not a HtmlCanvasElement");
+
+        let start_result = eframe::WebRunner::new()
+            .start(
+                canvas,
+                web_options,
+                Box::new(|cc: &eframe::CreationContext<'_>| {
+                    egui_extras::install_image_loaders(&cc.egui_ctx); // This gives us image support:
+                    let _style = egui::Style {
+                        visuals: egui::Visuals::dark(),
+                        ..egui::Style::default()
+                    };
+                    Ok(Box::<app::T6App>::default())
+                }),
+            )
+            .await;
+
+        // Remove the loading text and spinner:
+        if let Some(loading_text) = document.get_element_by_id("loading_text") {
+            match start_result {
+                Ok(_) => {
+                    loading_text.remove();
+                }
+                Err(e) => {
+                    loading_text.set_inner_html(
+                        "<p> The app has crashed. See the developer console for details. </p>",
+                    );
+                    panic!("Failed to start eframe: {e:?}");
+                }
+            }
+        }
+    });
+}
