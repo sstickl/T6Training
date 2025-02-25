@@ -2,6 +2,8 @@
 ## Description
 This is an app intended to help users memorize the boldface procedures for the T-6 Texan II.
 
+Please write any issues or suggestions in the "Issues" tab above.
+
 <h3><a href="https://sstickl.github.io/T6Training/">* * * Click here to run via web * * *</a></h3>
 
 > [!NOTE]
@@ -9,9 +11,9 @@ Please cross reference the material for whatever course/aircraft you are learnin
 
 ## Current Roadmap
 - [x] Load All Boldface Procedures/Ops Limits
-- [ ] Boldface Ops Limits Viewer
-- [ ] All Boldface Procedures Testable
-- [ ] Selection window for items to be tested on
+- [x] Boldface Ops Limits Viewer
+- [x] All Boldface Procedures Testable
+- [x] Selection window for items to be tested on
 - [ ] UI Clean-up
 - [ ] Additional Learning Objectives such as Aerodynamic Physics, Instrument Procedures, etc.
 

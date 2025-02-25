@@ -50,7 +50,7 @@ pub fn init_boldface_db() -> Vec<Vec<String>> {
             "ALTITUDE - CHECK"
         ],
         vec_of_strings![
-            "Fire In Flight/If Fire is Confirmed:",
+            "Fire In Flight/If Fire is Confirmed",
             "PCL - OFF",
             "FIREWALL SHUTOFF HANDLE - PULL"
         ],
@@ -63,6 +63,117 @@ pub fn init_boldface_db() -> Vec<Vec<String>> {
         vec_of_strings!["Eject", "EJECTION HANDLE - PULL"],
     ];
     emerg_ops
+}
+
+/// Holds the different boldface procedure types
+#[derive(PartialEq, Copy, Clone)]
+pub enum BfProcedureEnum {
+    EmergencyEngineShutdown,
+    Abort,
+    EngineFailureTakeoff,
+    EngineFailureFlight,
+    ImmediateAirstart,
+    UncommandedPower,
+    InadvertentDeparture,
+    FireInFlight,
+    OBOGSFailure,
+    Eject,
+}
+
+/// Holds the different boldface procedure types
+impl BfProcedureEnum {
+    pub fn iterator() -> std::slice::Iter<'static, BfProcedureEnum> {
+        static PROCEDURES: [BfProcedureEnum; 10] = [
+            BfProcedureEnum::EmergencyEngineShutdown,
+            BfProcedureEnum::Abort,
+            BfProcedureEnum::EngineFailureTakeoff,
+            BfProcedureEnum::EngineFailureFlight,
+            BfProcedureEnum::ImmediateAirstart,
+            BfProcedureEnum::UncommandedPower,
+            BfProcedureEnum::InadvertentDeparture,
+            BfProcedureEnum::FireInFlight,
+            BfProcedureEnum::OBOGSFailure,
+            BfProcedureEnum::Eject,
+        ];
+        PROCEDURES.iter()
+    }
+
+    //pub fn as_str(&self) -> &'static str {
+    //    match self {
+    //        BfProcedureEnum::EmergencyEngineShutdown => "Emergency Engine Shutdown on the Ground",
+    //        BfProcedureEnum::Abort => "Abort",
+    //        BfProcedureEnum::EngineFailureTakeoff => "Engine Failure Immediately After Takeoff (Sufficient Runway Remaining Straight Ahead)",
+    //        BfProcedureEnum::EngineFailureFlight => "Engine Failure During Flight",
+    //        BfProcedureEnum::ImmediateAirstart => "Immediate Airstart (PMU NORM)",
+    //        BfProcedureEnum::UncommandedPower => "Uncommanded Power Changes / Loss of Power / Uncommanded Propeller Feather",
+    //        BfProcedureEnum::InadvertentDeparture => "Inadvertent Departure from Controlled Flight",
+    //        BfProcedureEnum::FireInFlight => "Fire In Flight/If Fire is Confirmed",
+    //        BfProcedureEnum::OBOGSFailure => "OBOGS Failure/Overtemp/Physiological Symptoms",
+    //        BfProcedureEnum::Eject => "Eject",
+    //    }
+    //}
+
+    pub fn as_short_str(&self) -> &'static str {
+        match self {
+            BfProcedureEnum::EmergencyEngineShutdown => "Emergency Engine Ground Shutdown",
+            BfProcedureEnum::Abort => "Abort",
+            BfProcedureEnum::EngineFailureTakeoff => {
+                "Engine Failure Takeoff (Sufficient Runway Ahead)"
+            }
+            BfProcedureEnum::EngineFailureFlight => "Engine Failure During Flight",
+            BfProcedureEnum::ImmediateAirstart => "Immediate Airstart (PMU NORM)",
+            BfProcedureEnum::UncommandedPower => "Uncommanded Power Change/Loss / Prop Feather",
+            BfProcedureEnum::InadvertentDeparture => "Inadvertent Departure from Controlled Flight",
+            BfProcedureEnum::FireInFlight => "Fire In Flight/If Fire is Confirmed",
+            BfProcedureEnum::OBOGSFailure => "OBOGS Failure/Overtemp/Physiological Symptoms",
+            BfProcedureEnum::Eject => "Eject",
+        }
+    }
+
+    pub fn get_id(&self) -> usize {
+        match self {
+            BfProcedureEnum::EmergencyEngineShutdown => 0,
+            BfProcedureEnum::Abort => 1,
+            BfProcedureEnum::EngineFailureTakeoff => 2,
+            BfProcedureEnum::EngineFailureFlight => 3,
+            BfProcedureEnum::ImmediateAirstart => 4,
+            BfProcedureEnum::UncommandedPower => 5,
+            BfProcedureEnum::InadvertentDeparture => 6,
+            BfProcedureEnum::FireInFlight => 7,
+            BfProcedureEnum::OBOGSFailure => 8,
+            BfProcedureEnum::Eject => 9,
+        }
+    }
+
+    //pub fn next(&mut self) {
+    //    *self = match self {
+    //        BfProcedureEnum::EmergencyEngineShutdown => BfProcedureEnum::Abort,
+    //        BfProcedureEnum::Abort => BfProcedureEnum::EngineFailureTakeoff,
+    //        BfProcedureEnum::EngineFailureTakeoff => BfProcedureEnum::EngineFailureFlight,
+    //        BfProcedureEnum::EngineFailureFlight => BfProcedureEnum::ImmediateAirstart,
+    //        BfProcedureEnum::ImmediateAirstart => BfProcedureEnum::UncommandedPower,
+    //        BfProcedureEnum::UncommandedPower => BfProcedureEnum::InadvertentDeparture,
+    //        BfProcedureEnum::InadvertentDeparture => BfProcedureEnum::FireInFlight,
+    //        BfProcedureEnum::FireInFlight => BfProcedureEnum::OBOGSFailure,
+    //        BfProcedureEnum::OBOGSFailure => BfProcedureEnum::Eject,
+    //        BfProcedureEnum::Eject => BfProcedureEnum::EmergencyEngineShutdown,
+    //    }
+    //}
+
+    //pub fn prev(&mut self) {
+    //    *self = match self {
+    //        BfProcedureEnum::EmergencyEngineShutdown => BfProcedureEnum::Eject,
+    //        BfProcedureEnum::Abort => BfProcedureEnum::EmergencyEngineShutdown,
+    //        BfProcedureEnum::EngineFailureTakeoff => BfProcedureEnum::Abort,
+    //        BfProcedureEnum::EngineFailureFlight => BfProcedureEnum::EngineFailureTakeoff,
+    //        BfProcedureEnum::ImmediateAirstart => BfProcedureEnum::EngineFailureFlight,
+    //        BfProcedureEnum::UncommandedPower => BfProcedureEnum::ImmediateAirstart,
+    //        BfProcedureEnum::InadvertentDeparture => BfProcedureEnum::UncommandedPower,
+    //        BfProcedureEnum::FireInFlight => BfProcedureEnum::InadvertentDeparture,
+    //        BfProcedureEnum::OBOGSFailure => BfProcedureEnum::FireInFlight,
+    //        BfProcedureEnum::Eject => BfProcedureEnum::OBOGSFailure,
+    //    }
+    //}
 }
 
 /// Returns a hashmap of hashmaps of vectors of strings that contains the boldface operational data

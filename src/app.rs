@@ -1,3 +1,4 @@
+use core::f32;
 use egui::{CentralPanel, Ui};
 use std::collections::HashMap;
 
@@ -11,7 +12,7 @@ enum Screen {
     #[default]
     MainMenu, // Main menu screen
     OpsQuiz,        // Random quiz screen for BoldFace Ops
-    _BoldFaceQuiz,  // Quiz screen for Boldface Procedures. **NOT YET IMPLEMENTED**
+    BoldFaceQuiz,   // Quiz screen for Boldface Procedures. **NOT YET IMPLEMENTED**
     BoldFaceViewer, // Viewer for Boldface Procedures    **NOT YET IMPLEMENTED**
     OpsDataViewer,  // Viewer for Operational Data  **NOT YET IMPLEMENTED**
 }
@@ -27,6 +28,7 @@ pub struct T6App {
     correct_answers: Vec<String>, // Tracks the correct answers to the current quiz
     answered: bool,            // Tracks whether the current quiz screen has been answered.
     ops_section: boldface::BfOpdataEnum, // Tracks the section desired for the ops_data quiz
+    procedures_section: boldface::BfProcedureEnum, // Tracks the section desired for the boldface quiz
 }
 
 /// Our App runs off of eframe
@@ -39,10 +41,10 @@ impl eframe::App for T6App {
             Screen::OpsQuiz => self.render_queried_op_quizzer(ctx, self.ops_section.as_str()),
             Screen::BoldFaceViewer => self.render_bf_viewer(ctx),
             Screen::OpsDataViewer => self.render_ops_data_viewer(ctx, self.ops_section.as_str()),
-            // Screen::BoldFaceQuizScreen => self.render_bf_quizzer(ctx),     **NOT YET IMPLEMENTED**
-            _ => {
-                println!("Screen not implemented:");
-            }
+            Screen::BoldFaceQuiz => self.render_bf_quizzer(ctx),
+            //_ => {
+            //println!("Screen not implemented:");
+            //}
         }
     }
 }
@@ -61,12 +63,25 @@ impl Default for T6App {
             op_data: boldface::init_bf_opdata_db(),     // Initialize boldface ops db
             correct_answers: Vec::<String>::new(),      // Initialize correct answers vector
             ops_section: boldface::BfOpdataEnum::Engine, // Default ops data to engine/first section
+            procedures_section: boldface::BfProcedureEnum::EmergencyEngineShutdown, // Default boldface quiz to engine/first section
         }
     }
 }
 
 /// T6App functions
 impl T6App {
+    /// Reset quizzer variables
+    /// Clears the answers, correct answers, and sets answered to false
+    fn reset_quizzer(&mut self) {
+        self.answers.clear();
+        self.correct_answers.clear();
+        self.answered = false;
+        for i in 0..self.hidden_display.len() {
+            self.hidden_display[i] = false;
+            self.answered = false;
+        }
+    }
+
     /// Render the main menu, opened when the app starts
     fn render_main_menu(&mut self, ctx: &egui::Context) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
@@ -80,8 +95,8 @@ impl T6App {
                         .get_mut(&egui::TextStyle::Heading)
                         .unwrap()
                         .size = 32.0; // Make the header big
-                    ui.heading("T6 Boldface Training App");
-                    ui.add_space(50.0); // Adds 50 pixels of vertical space
+                    ui.heading("T6 Boldface Training App v0.1.2");
+                    ui.add_space(20.0); // Adds 50 pixels of vertical space
 
                     // Display the T6RA image. Works on everything but Safari for some reason.
                     //.max_height(ctx.screen_rect().height() / 3.0),
@@ -90,20 +105,32 @@ impl T6App {
                             .max_height(200.0),
                     )
                     .on_hover_text_at_pointer("T6 Photo by USAF MSgt David Richards");
-                    ui.add_space(50.0); // Adds 50 pixels of vertical space after
+
+                    ui.add_space(20.0); // Adds 20 pixels of vertical space after
+                    ui.horizontal_wrapped(|ui| {
+                        ui.spacing_mut().item_spacing.x = 0.0;
+                        ui.label("Submit comments/issues via the ");
+                        ui.add(egui::Hyperlink::from_label_and_url(
+                            "Github page under the Issues tab",
+                            "https://github.com/sstickl/T6Training",
+                        ));
+                        ui.label(".  Good luck studying!");
+                    });
+
+                    ui.add_space(20.0); // Adds 20 pixels of vertical space after
 
                     // UI section for selecting the next screen
                     ui.scope(|ui| {
                         // Set the spacing between items
                         ui.spacing_mut().item_spacing.y = 30.0;
 
-                        // Opdata Quiz button to select a specific section
+                        // Opdata Quiz
                         if ui.button("Opdata Quiz (select section below)").clicked() {
                             self.setup_queried_op_quizzer(self.ops_section.as_str());
                             self.current_screen = Screen::OpsQuiz;
                         }
 
-                        // Opdata Viewer *** Not yet implemented ***
+                        // Opdata Viewer
                         if ui
                             .button("Operational Data (select section below)")
                             .clicked()
@@ -112,79 +139,113 @@ impl T6App {
                             self.current_screen = Screen::OpsDataViewer
                         }
 
-                        // Opdata Quiz to choose the specific section
-                        ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
-                            ui.add(egui::Label::new("Choose section for Ops Data:"));
-                            egui::ComboBox::from_label("")
-                                .selected_text(self.ops_section.as_str().to_string())
-                                .show_ui(ui, |ui| {
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::Engine,
-                                        "Engine",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::ProhibitedManeuvers,
-                                        "Prohibited Manuevers",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::AirspeedLimitations,
-                                        "Airspeed Limitations",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::Starting,
-                                        "Starting",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::Pressurization,
-                                        "Pressurization",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::Fuel,
-                                        "Fuel",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::Runway,
-                                        "Runway",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::MaximumCrosswinds,
-                                        "Maximum Crosswinds",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::AccelerationLimits,
-                                        "Acceleration Limits",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::IntentionalSpinEntry,
-                                        "Intentional Spin Entry",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::Icing,
-                                        "Icing",
-                                    );
-                                    ui.selectable_value(
-                                        &mut self.ops_section,
-                                        BfOpdataEnum::Temperature,
-                                        "Temperature",
-                                    );
-                                });
+                        // Dropdown for Ops Data
+                        ui.push_id(1, |ui| {
+                            ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
+                                ui.add(egui::Label::new("Operational Data Section:"));
+                                egui::ComboBox::from_label("")
+                                    .selected_text(self.ops_section.as_str().to_string())
+                                    .show_ui(ui, |ui| {
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::Engine,
+                                            "Engine",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::ProhibitedManeuvers,
+                                            "Prohibited Manuevers",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::AirspeedLimitations,
+                                            "Airspeed Limitations",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::Starting,
+                                            "Starting",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::Pressurization,
+                                            "Pressurization",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::Fuel,
+                                            "Fuel",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::Runway,
+                                            "Runway",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::MaximumCrosswinds,
+                                            "Maximum Crosswinds",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::AccelerationLimits,
+                                            "Acceleration Limits",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::IntentionalSpinEntry,
+                                            "Intentional Spin Entry",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::Icing,
+                                            "Icing",
+                                        );
+                                        ui.selectable_value(
+                                            &mut self.ops_section,
+                                            BfOpdataEnum::Temperature,
+                                            "Temperature",
+                                        );
+                                    });
+                            });
                         });
 
                         // Boldface Viewer
-                        if ui.button("Boldface Viewer").clicked() {
+                        if ui
+                            .button("Boldface Viewer (select section below)")
+                            .clicked()
+                        {
                             self.current_screen = Screen::BoldFaceViewer;
                         }
+
+                        // Boldface Quizzer
+                        if ui
+                            .button("Boldface Quizzer (select section below)")
+                            .clicked()
+                        {
+                            self.setup_bf_quizzer();
+                            self.current_screen = Screen::BoldFaceQuiz;
+                        }
+
+                        // Dropdown for Boldface Procedures
+                        ui.push_id(2, |ui| {
+                            ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
+                                ui.add(egui::Label::new("Procedure Data Section:"));
+                                egui::ComboBox::from_label("")
+                                    .selected_text(
+                                        self.procedures_section.as_short_str().to_string(),
+                                    )
+                                    .show_ui(ui, |ui| {
+                                        for procedure in boldface::BfProcedureEnum::iterator() {
+                                            ui.selectable_value(
+                                                &mut self.procedures_section,
+                                                *procedure,
+                                                procedure.as_short_str(),
+                                            );
+                                        }
+                                    });
+                            });
+                        });
                     });
 
                     // Make sure we get the space we need
@@ -192,20 +253,40 @@ impl T6App {
                 },
             );
         });
+        self.boldface_number = self.procedures_section.get_id();
     }
 
-    /// The boldface viewer screen
-    /// Displays the boldface procedures with hidden steps that can be revealed
-    fn render_bf_viewer(&mut self, ctx: &egui::Context) {
+    /// Sets up the screen for the bf quizzer
+    fn setup_bf_quizzer(&mut self) {
+        // Clear class variables to ensure the answers aren't displayed immediately/textboxes aren't filled
+        self.reset_quizzer();
+
+        // Setup answers vector
+        for _i in 0..6 {
+            self.answers.push(String::new());
+        }
+    }
+
+    fn render_bf_quizzer(&mut self, ctx: &egui::Context) {
         // Render the bottom buttons first.
         // Reveal All, Next Procedure, Previous Procedure, Back to Main Menu
         egui::TopBottomPanel::bottom("bot_bf_panel").show(ctx, |ui| {
             ui.add_space(20.0); // Adds 50 pixels of vertical space
             ui.columns(4, |columns| {
                 columns[0].vertical_centered(|ui| {
-                    if ui.button("Reveal All").clicked() {
-                        for i in 0..self.hidden_display.len() {
-                            self.hidden_display[i] = true;
+                    if self.answered == false {
+                        if ui.button("Answer All").clicked() {
+                            for i in 0..self.hidden_display.len() {
+                                self.hidden_display[i] = true;
+                                self.answered = true;
+                            }
+                        }
+                    } else {
+                        if ui.button("Hide All").clicked() {
+                            for i in 0..self.hidden_display.len() {
+                                self.hidden_display[i] = false;
+                                self.answered = false;
+                            }
                         }
                     }
                 });
@@ -221,10 +302,163 @@ impl T6App {
                             self.boldface_number = 9;
                             self.hidden_display = [false, false, false].to_vec()
                         }
+                        self.setup_bf_quizzer();
                     }
                 });
                 columns[2].vertical_centered(|ui| {
                     if ui.button("Next Procedure").clicked() {
+                        // Ensure we don't overflow
+                        if self.boldface_number < 9 {
+                            self.boldface_number += 1;
+                            self.hidden_display = [false, false, false].to_vec()
+                        }
+                        // Wrap around if needed
+                        else {
+                            self.boldface_number = 0;
+                            self.hidden_display = [false, false, false].to_vec()
+                        }
+                        self.setup_bf_quizzer();
+                    }
+                });
+                columns[3].vertical_centered(|ui| {
+                    // Button to go back to the main menu
+                    if ui.button("Back to Main Menu").clicked() {
+                        self.reset_quizzer();
+                        self.current_screen = Screen::MainMenu;
+                    }
+                });
+            });
+            ui.add_space(20.0); // Adds 20 pixels of vertical space
+        });
+
+        // The main contents of the screen
+        CentralPanel::default().show(ctx, |ui: &mut Ui| {
+            // Heading
+            ui.heading("Boldface Op Quizzer");
+            ui.add_space(10.0); // Adds 50 pixels of vertical space
+
+            // Boldface Op Viewer Area
+            ui.scope(|ui| {
+                ui.set_min_height(35.0);
+                // Display section/instructions
+                ui.label(format!(
+                    "Boldface for: {}",
+                    self.boldface_ops[self.boldface_number][0]
+                ));
+                if self.answered {
+                    let mut correct = true;
+                    for (answer, correct_answer) in self
+                        .answers
+                        .iter()
+                        .zip(self.boldface_ops[self.boldface_number][1..].iter())
+                    {
+                        if answer != correct_answer {
+                            correct = false;
+                            break;
+                        }
+                    }
+                    if correct {
+                        ui.label(
+                            egui::RichText::new("Answers were correct")
+                                .background_color(egui::Color32::from_rgb(0, 255, 0)),
+                        );
+                    } else {
+                        ui.label(
+                            egui::RichText::new("Answers were incorrect!")
+                                .background_color(egui::Color32::from_rgb(255, 0, 0)),
+                        );
+                        if ui.small_button("Display Correct Answers").clicked() {
+                            for (index, correct_answer) in self.boldface_ops[self.boldface_number]
+                                [1..]
+                                .iter()
+                                .enumerate()
+                            {
+                                self.answers[index] = correct_answer.to_string();
+                            }
+                        }
+                    }
+                } else {
+                    ui.label("Answers not yet checked.");
+                }
+            });
+            ui.separator();
+
+            // Display the steps for the current boldface procedure
+            ui.scope(|ui| {
+                ui.set_min_height(120.0);
+
+                if self.answered {
+                    graphics::label_answered_procedure(
+                        ui,
+                        &mut self.answers,
+                        &mut self.boldface_ops[self.boldface_number][1..],
+                    );
+                    //}
+                } else {
+                    for index in 0..6 {
+                        ui.add(egui::Label::new(format!(
+                            "Step {} (if applicable): ",
+                            index
+                        )));
+                        if self.answers.len() > index {
+                            ui.add(
+                                egui::TextEdit::singleline(&mut self.answers[index])
+                                    .desired_width(f32::INFINITY), //7 too small
+                            );
+                        }
+                    }
+                }
+                //let label_string = step.to_string();
+                //graphics::hidden_label(ui, &label_string, &mut self.hidden_display[index - 1]);
+            });
+
+            ui.add_space(20.0); // Adds 50 pixels of vertical space
+        });
+    }
+
+    /// The boldface viewer screen
+    /// Displays the boldface procedures with hidden steps that can be revealed
+    fn render_bf_viewer(&mut self, ctx: &egui::Context) {
+        // Render the bottom buttons first.
+        // Reveal All, Next Procedure, Previous Procedure, Back to Main Menu
+        egui::TopBottomPanel::bottom("bot_bf_panel").show(ctx, |ui| {
+            ui.add_space(20.0); // Adds 50 pixels of vertical space
+            ui.columns(4, |columns| {
+                columns[0].vertical_centered(|ui| {
+                    if self.answered == false {
+                        if ui.button("Reveal All").clicked() {
+                            for i in 0..self.hidden_display.len() {
+                                self.hidden_display[i] = true;
+                                self.answered = true;
+                            }
+                        }
+                    } else {
+                        if ui.button("Hide All").clicked() {
+                            for i in 0..self.hidden_display.len() {
+                                self.hidden_display[i] = false;
+                                self.answered = false;
+                            }
+                        }
+                    }
+                });
+                columns[1].vertical_centered(|ui| {
+                    if ui.button("Previous Procedure").clicked() {
+                        self.answered = false;
+                        // Ensure we don't underflow
+                        if self.boldface_number > 0 {
+                            self.boldface_number -= 1;
+                            self.hidden_display = [false, false, false].to_vec()
+                        }
+                        // Wrap around if needed
+                        else {
+                            self.boldface_number = 9;
+                            self.hidden_display = [false, false, false].to_vec()
+                        }
+                    }
+                });
+                columns[2].vertical_centered(|ui| {
+                    if ui.button("Next Procedure").clicked() {
+                        self.answered = false;
                         // Ensure we don't overflow
                         if self.boldface_number < 9 {
                             self.boldface_number += 1;
@@ -240,6 +474,7 @@ impl T6App {
                 columns[3].vertical_centered(|ui| {
                     // Button to go back to the main menu
                     if ui.button("Back to Main Menu").clicked() {
+                        self.answered = false;
                         self.boldface_number = 0;
                         self.current_screen = Screen::MainMenu;
                     }
@@ -287,9 +522,7 @@ impl T6App {
     /// The query it takes in is the section to be quizzed on
     fn setup_queried_op_quizzer(&mut self, query: &str) {
         // Clear class variables to ensure the answers aren't displayed immediately/textboxes aren't filled
-        self.answers.clear();
-        self.answered = false;
-        self.correct_answers.clear();
+        self.reset_quizzer();
 
         // Local variables
         let mut answer_index = 0; // Index for the answers vector
@@ -360,13 +593,15 @@ impl T6App {
                 columns[3].vertical_centered(|ui| {
                     if ui.button("Data Viewer").clicked() {
                         self.answered = false;
+                        for answer in self.answers.iter_mut() {
+                            *answer = "".to_string()
+                        }
                         self.current_screen = Screen::OpsDataViewer;
                     }
                 });
                 columns[4].vertical_centered(|ui| {
                     // Button to go back to the main menu
                     if ui.button("Back to Main Menu").clicked() {
-                        self.answered = false;
                         self.current_screen = Screen::MainMenu;
                     }
                 });
@@ -479,9 +714,6 @@ impl T6App {
                 columns[0].vertical_centered(|ui| {
                     // Button to check answers
                     if ui.button("Convert to Quiz").clicked() {
-                        for answer in self.answers.iter_mut() {
-                            *answer = "".to_string()
-                        }
                         self.current_screen = Screen::OpsQuiz;
                     }
                 });
