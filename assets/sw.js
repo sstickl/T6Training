@@ -1,8 +1,5 @@
-var cacheName = 'egui-template-pwa';
+var cacheName = 't6trainingv012_1';
 var filesToCache = [
-  './',
-  './index.html',
-  './t6_training.js',
   './t6_training_bg.wasm',
 ];
 
@@ -20,6 +17,21 @@ self.addEventListener('fetch', function (e) {
   e.respondWith(
     caches.match(e.request).then(function (response) {
       return response || fetch(e.request);
+    })
+  );
+});
+
+/* Activate the service worker and clear old caches */
+self.addEventListener('activate', function (e) {
+  e.waitUntil(
+    caches.keys().then(function (cacheNames) {
+      return Promise.all(
+        cacheNames.map(function (cache) {
+          if (cache !== cacheName) {
+            return caches.delete(cache);
+          }
+        })
+      );
     })
   );
 });

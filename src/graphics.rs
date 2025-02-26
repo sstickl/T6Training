@@ -3,7 +3,7 @@ const TEXTBOX_WIDTH: usize = 12; // Constant for the width of the text box in th
 /// sets up the frame for the widgets
 fn set_up_frame() -> egui::Frame {
     egui::Frame::none()
-        .fill(egui::Color32::from_rgb(200, 200, 200))
+        //.fill(egui::Color32::from_rgb(200, 200, 200))
         .rounding(egui::Rounding {
             nw: 2.0,
             ne: 2.0,
