@@ -111,7 +111,7 @@ impl T6App {
                         ui.spacing_mut().item_spacing.x = 0.0;
                         ui.label("Submit comments/issues via the ");
                         ui.add(egui::Hyperlink::from_label_and_url(
-                            "Github page under the Issues tab",
+                            "Github Repository under the Issues tab",
                             "https://github.com/sstickl/T6Training",
                         ));
                         ui.label(".  Good luck studying!");

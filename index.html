@@ -138,7 +138,7 @@
         // We disable caching during development so that we always view the latest version.
         if ('serviceWorker' in navigator && window.location.hash !== "#dev") {
             window.addEventListener('load', function () {
-                navigator.serviceWorker.register('assets/sw.js?v=3').then(function (registration) {
+                navigator.serviceWorker.register('assets/sw.js').then(function (registration) {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
                 }, function (err) {
                     console.log('ServiceWorker registration failed: ', err);

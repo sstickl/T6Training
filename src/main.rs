@@ -62,7 +62,7 @@ fn main() {
                 Box::new(|cc: &eframe::CreationContext<'_>| {
                     egui_extras::install_image_loaders(&cc.egui_ctx); // This gives us image support:
                     let _style = egui::Style {
-                        visuals: egui::Visuals::light(),
+                        visuals: egui::Visuals::default(),
                         ..egui::Style::default()
                     };
                     Ok(Box::<app::T6App>::default())

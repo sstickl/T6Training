@@ -1,4 +1,4 @@
-var cacheName = 't6trainingv012_1';
+var cacheName = 't6trainingv012_2';
 var filesToCache = [
   './t6_training_bg.wasm',
 ];
