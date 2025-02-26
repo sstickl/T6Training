@@ -408,7 +408,7 @@ impl BfOpdataEnum {
     pub fn as_str(&self) -> &'static str {
         match self {
             BfOpdataEnum::Engine => "Engine",
-            BfOpdataEnum::ProhibitedManeuvers => "Prohibited Manuevers",
+            BfOpdataEnum::ProhibitedManeuvers => "Prohibited Maneuvers",
             BfOpdataEnum::AirspeedLimitations => "Airspeed Limitations",
             BfOpdataEnum::Starting => "Starting",
             BfOpdataEnum::Pressurization => "Pressurization",
