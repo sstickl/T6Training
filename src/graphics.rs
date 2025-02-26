@@ -209,7 +209,7 @@ pub fn label_answered_procedure(
                 index
             )));
             if answers.len() > index {
-                if answers[index] == "" {
+                if answers[index].is_empty() {
                     ui.style_mut().visuals.widgets.inactive.bg_stroke =
                         egui::Stroke::new(1.0, egui::Color32::GREEN);
                     let _response = ui.add(

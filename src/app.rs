@@ -274,20 +274,15 @@ impl T6App {
             ui.add_space(20.0); // Adds 50 pixels of vertical space
             ui.columns(4, |columns| {
                 columns[0].vertical_centered(|ui| {
-                    if self.answered == false {
+                    if !self.answered {
                         if ui.button("Answer All").clicked() {
                             for i in 0..self.hidden_display.len() {
                                 self.hidden_display[i] = true;
                                 self.answered = true;
                             }
                         }
-                    } else {
-                        if ui.button("Hide All").clicked() {
-                            for i in 0..self.hidden_display.len() {
-                                self.hidden_display[i] = false;
-                                self.answered = false;
-                            }
-                        }
+                    } else if ui.button("Reset All").clicked() {
+                        self.setup_bf_quizzer();
                     }
                 });
                 columns[1].vertical_centered(|ui| {
@@ -425,19 +420,17 @@ impl T6App {
             ui.add_space(20.0); // Adds 50 pixels of vertical space
             ui.columns(4, |columns| {
                 columns[0].vertical_centered(|ui| {
-                    if self.answered == false {
+                    if !self.answered {
                         if ui.button("Reveal All").clicked() {
                             for i in 0..self.hidden_display.len() {
                                 self.hidden_display[i] = true;
                                 self.answered = true;
                             }
                         }
-                    } else {
-                        if ui.button("Hide All").clicked() {
-                            for i in 0..self.hidden_display.len() {
-                                self.hidden_display[i] = false;
-                                self.answered = false;
-                            }
+                    } else if ui.button("Hide All").clicked() {
+                        for i in 0..self.hidden_display.len() {
+                            self.hidden_display[i] = false;
+                            self.answered = false;
                         }
                     }
                 });

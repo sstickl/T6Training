@@ -113,6 +113,7 @@ impl BfProcedureEnum {
     //    }
     //}
 
+    /// Returns a short string representation of the BfProcedureEnum
     pub fn as_short_str(&self) -> &'static str {
         match self {
             BfProcedureEnum::EmergencyEngineShutdown => "Emergency Engine Ground Shutdown",
@@ -130,6 +131,7 @@ impl BfProcedureEnum {
         }
     }
 
+    /// Returns a usize representation of the BfProcedureEnum compared to the Boldface DB
     pub fn get_id(&self) -> usize {
         match self {
             BfProcedureEnum::EmergencyEngineShutdown => 0,
