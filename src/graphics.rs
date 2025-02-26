@@ -168,6 +168,68 @@ pub fn label_answered_question(
     });
 }
 
+/// A custom widget that goes through an boldface procedures vector and labels answers right/wrong
+/// takes in correct answers as the boldface ops[x] vector
+/// Outlines whether the answers are correct or incorrect
+pub fn label_answered_procedure(
+    ui: &mut egui::Ui,
+    answers: &mut [String],
+    correct_answers: &mut [String],
+) {
+    // Create a frame for the widget to go around the line
+    //let frame = set_up_frame();
+
+    // Display the frame and the line
+    //frame.show(ui, |ui| {
+    ui.scope(|ui| {
+        for (index, _step) in correct_answers.iter().enumerate() {
+            ui.add(egui::Label::new(format!("Step {}: ", index + 1)));
+            if answers[index] == correct_answers[index] {
+                ui.style_mut().visuals.widgets.inactive.bg_stroke =
+                    egui::Stroke::new(1.0, egui::Color32::GREEN);
+                let _response = ui.add(
+                    egui::TextEdit::singleline(&mut answers[index])
+                        .desired_width((correct_answers[index].len() * TEXTBOX_WIDTH) as f32),
+                );
+            } else {
+                ui.style_mut().visuals.widgets.inactive.bg_stroke =
+                    egui::Stroke::new(1.0, egui::Color32::RED);
+                let _response = ui.add(
+                    egui::TextEdit::singleline(&mut answers[index])
+                        .desired_width((correct_answers[index].len() * TEXTBOX_WIDTH) as f32),
+                );
+            }
+        }
+    });
+    ui.scope(|ui| {
+        ui.disable();
+        for index in correct_answers.len()..5 {
+            ui.add(egui::Label::new(format!(
+                "Step {} (NOT APPLICABLE): ",
+                index
+            )));
+            if answers.len() > index {
+                if answers[index].is_empty() {
+                    ui.style_mut().visuals.widgets.inactive.bg_stroke =
+                        egui::Stroke::new(1.0, egui::Color32::GREEN);
+                    let _response = ui.add(
+                        egui::TextEdit::singleline(&mut answers[index])
+                            .desired_width(f32::INFINITY),
+                    );
+                } else {
+                    ui.style_mut().visuals.widgets.inactive.bg_stroke =
+                        egui::Stroke::new(1.0, egui::Color32::RED);
+                    let _response = ui.add(
+                        egui::TextEdit::singleline(&mut answers[index])
+                            .desired_width(f32::INFINITY), //7 too small
+                    );
+                }
+            }
+        }
+    });
+    //});
+}
+
 /// A custom widget that goes through a string and makes a line with a text box for the strings with answers
 /// Outlines whether the answers are correct or incorrect
 pub fn label_ops_data(
