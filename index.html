@@ -15,8 +15,8 @@
     <!-- config for our rust wasm binary. go to https://trunkrs.dev/assets/#rust for more customization -->
     
 <script type="module">
-import init, * as bindings from 'https://sstickl.github.io/T6Training/t6_training.js';
-const wasm = await init({ module_or_path: 'https://sstickl.github.io/T6Training/t6_training_bg.wasm' });
+import init, * as bindings from './t6_training.js';
+const wasm = await init({ module_or_path: './t6_training_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -26,9 +26,9 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
     <!-- this is the base url relative to which other urls will be constructed. trunk will insert this from the public-url option -->
-    <base href="https://sstickl.github.io/T6Training/" />
+    <base href="./" />
 
-    <link rel="icon" href="https://sstickl.github.io/T6Training/favicon.ico" integrity="sha384&#x2D;dI9zOG2&#x2F;VOQ4JGmc4piN3drd91kuy86BW8j4hRZlGP&#x2B;1dq&#x2B;kIwIHSUB6cRUgTdut"/>
+    <link rel="icon" href="./favicon.ico" integrity="sha384&#x2D;dI9zOG2&#x2F;VOQ4JGmc4piN3drd91kuy86BW8j4hRZlGP&#x2B;1dq&#x2B;kIwIHSUB6cRUgTdut"/>
 
 
     
@@ -131,7 +131,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             }
         }
     </style>
-<link rel="modulepreload" href="https://sstickl.github.io/T6Training/t6_training.js" crossorigin="anonymous" integrity="sha384-LqcHjx+T9fLEL22EICJmGtBy4/3ysXwUABZMXYNqRtdgxSw+cVGLUe7svfETEFA2"><link rel="preload" href="https://sstickl.github.io/T6Training/t6_training_bg.wasm" crossorigin="anonymous" integrity="sha384-DzoB9TCdDTonblzubRe96jWfMZ4j2Po5hjW1NpqlDoa8JBOaXTf+0Pc7RPeZ9DIf" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="./t6_training.js" crossorigin="anonymous" integrity="sha384-aIhiUwXXQazYCnllKOsioobM6k8YKz3wQiNeDS/8ugeF3ctoHdt9C7BFHJJPAut8"><link rel="preload" href="./t6_training_bg.wasm" crossorigin="anonymous" integrity="sha384-3VoQZpeYtbsMuB9qGFHDU1BJ0npkIXVyoJ9i6MmqRBk2qi+72JQLO7FBhtOGYL/d" as="fetch" type="application/wasm"></head>
 
 <body>
     <!-- The WASM code will resize the canvas dynamically -->
@@ -147,8 +147,8 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
     </div>
 
     <!--Register Service Worker. this will cache the wasm / js scripts for offline use (for PWA functionality). -->
-    <!-- Force refresh (Ctrl + F5) to load the latest files instead of cached files  -->
-    <!-- <script>
+    <!-- Force refresh (Ctrl + F5) to load the latest files instead of cached files
+    <script>
         // We disable caching during development so that we always view the latest version.
         if ('serviceWorker' in navigator && window.location.hash !== "#dev") {
             window.addEventListener('load', function () {
