@@ -29,6 +29,7 @@ pub struct T6App {
     answered: bool,            // Tracks whether the current quiz screen has been answered.
     ops_section: boldface::BfOpdataEnum, // Tracks the section desired for the ops_data quiz
     procedures_section: boldface::BfProcedureEnum, // Tracks the section desired for the boldface quiz
+    hidden_ops_data: Vec<bool>, // Tracks whether text on the Ops Data Viewer is hidden. Unintuitively, false = hidden
 }
 
 /// Our App runs off of eframe
@@ -64,6 +65,7 @@ impl Default for T6App {
             correct_answers: Vec::<String>::new(),      // Initialize correct answers vector
             ops_section: boldface::BfOpdataEnum::Engine, // Default ops data to engine/first section
             procedures_section: boldface::BfProcedureEnum::EmergencyEngineShutdown, // Default boldface quiz to engine/first section
+            hidden_ops_data: Vec::<bool>::new(),        // Initialize hidden ops data vector
         }
     }
 }
@@ -142,6 +144,7 @@ impl T6App {
                         // Dropdown for Ops Data
                         ui.push_id(1, |ui| {
                             ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
+                                
                                 ui.add(egui::Label::new("Operational Data Section:"));
                                 egui::ComboBox::from_label("")
                                     .selected_text(self.ops_section.as_str().to_string())
@@ -555,6 +558,7 @@ impl T6App {
             }
             query_match = false; // Reset the query match for category
         }
+        self.hidden_ops_data.resize(self.answers.len(), false);
     }
 
     /// The operational data quizzer screen
@@ -775,6 +779,7 @@ impl T6App {
                                     &mut self.answers,
                                     &mut answer_index,
                                     &mut self.correct_answers,
+                                    &mut self.hidden_ops_data,
                                 );
                             }
                             ui.add_space(5.0);

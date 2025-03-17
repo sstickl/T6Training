@@ -55,6 +55,10 @@ pub fn init_boldface_db() -> Vec<Vec<String>> {
             "FIREWALL SHUTOFF HANDLE - PULL"
         ],
         vec_of_strings![
+            "<32>PHYSIOLOGICAL SYMPTONS",
+            "BOS PUSH MAN - PRESS ON"
+        ],
+        vec_of_strings![
             "OBOGS Failure / Overtemp / Physiological Symptoms",
             "GREEN RING - PULL (AS REQUIRED)",
             "DESCENT BELOW 10,000 FEET MSL - INITIATE",
@@ -76,6 +80,7 @@ pub enum BfProcedureEnum {
     UncommandedPower,
     InadvertentDeparture,
     FireInFlight,
+    PhysiologicalSympons,
     OBOGSFailure,
     Eject,
 }
@@ -83,7 +88,7 @@ pub enum BfProcedureEnum {
 /// Holds the different boldface procedure types
 impl BfProcedureEnum {
     pub fn iterator() -> std::slice::Iter<'static, BfProcedureEnum> {
-        static PROCEDURES: [BfProcedureEnum; 10] = [
+        static PROCEDURES: [BfProcedureEnum; 11] = [
             BfProcedureEnum::EmergencyEngineShutdown,
             BfProcedureEnum::Abort,
             BfProcedureEnum::EngineFailureTakeoff,
@@ -92,6 +97,7 @@ impl BfProcedureEnum {
             BfProcedureEnum::UncommandedPower,
             BfProcedureEnum::InadvertentDeparture,
             BfProcedureEnum::FireInFlight,
+            BfProcedureEnum::PhysiologicalSympons,
             BfProcedureEnum::OBOGSFailure,
             BfProcedureEnum::Eject,
         ];
@@ -126,6 +132,7 @@ impl BfProcedureEnum {
             BfProcedureEnum::UncommandedPower => "Uncommanded Power Change/Loss / Prop Feather",
             BfProcedureEnum::InadvertentDeparture => "Inadvertent Departure from Controlled Flight",
             BfProcedureEnum::FireInFlight => "Fire In Flight/If Fire is Confirmed",
+            BfProcedureEnum::PhysiologicalSympons => "<32>Physiological Symptoms",
             BfProcedureEnum::OBOGSFailure => "OBOGS Failure/Overtemp/Physiological Symptoms",
             BfProcedureEnum::Eject => "Eject",
         }
@@ -142,8 +149,9 @@ impl BfProcedureEnum {
             BfProcedureEnum::UncommandedPower => 5,
             BfProcedureEnum::InadvertentDeparture => 6,
             BfProcedureEnum::FireInFlight => 7,
-            BfProcedureEnum::OBOGSFailure => 8,
-            BfProcedureEnum::Eject => 9,
+            BfProcedureEnum::PhysiologicalSympons => 8,
+            BfProcedureEnum::OBOGSFailure => 9,
+            BfProcedureEnum::Eject => 10,
         }
     }
 
@@ -271,7 +279,7 @@ pub fn init_bf_opdata_db() -> HashMap<String, HashMap<String, Vec<String>>> {
                 "Wait _$30_ Sec, _$2_ Min, _$5_ Min, _$30_ Min after each start/motoring attempt",
                 "Maximum ITT _$871_ to _$1000_ °C for _$5_ Sec (Do Not Attempt Restart)",
                 "Maximum Oil Pressure _$200_ PSI",
-                "Maximum Oil Temperature _$-40_ °C",
+                "Minimum Oil Temperature _$-40_ °C",
                 "Minimum Battery Voltage _$23.5_ V"
             ],
         );

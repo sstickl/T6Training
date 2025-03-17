@@ -23,11 +23,12 @@ fn main() -> eframe::Result<(), eframe::Error> {
         native_options,
         Box::new(|cc: &eframe::CreationContext<'_>| {
             egui_extras::install_image_loaders(&cc.egui_ctx); // This gives us image support:
-            let _style = egui::Style {
+            //let style = egui::Style {
                 //need to fix this so the app configures for dark/light
-                visuals: egui::Visuals::light(),
-                ..egui::Style::default()
-            };
+            //    ..egui::Style::default()
+            //};
+            //cc.egui_ctx.set_theme(egui::Theme::Dark);
+            graphics::configure_text_styles(&cc.egui_ctx);
             Ok(Box::<app::T6App>::default())
         }),
     )

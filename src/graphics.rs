@@ -1,4 +1,33 @@
+use egui::{FontId, TextStyle};
+use std::collections::BTreeMap;
+
 const TEXTBOX_WIDTH: usize = 12; // Constant for the width of the text box in the question widget (in characters)
+
+#[inline]
+fn heading2() -> TextStyle {
+    TextStyle::Name("Heading2".into())
+}
+
+#[inline]
+fn heading3() -> TextStyle {
+    TextStyle::Name("ContextHeading".into())
+}
+
+pub fn configure_text_styles(ctx: &egui::Context) {
+    use egui::FontFamily::{Monospace, Proportional};
+
+    let text_styles: BTreeMap<TextStyle, FontId> = [
+        (TextStyle::Heading, FontId::new(25.0, Proportional)),
+        (heading2(), FontId::new(22.0, Proportional)),
+        (heading3(), FontId::new(19.0, Proportional)),
+        (TextStyle::Body, FontId::new(16.0, Proportional)),
+        (TextStyle::Monospace, FontId::new(12.0, Monospace)),
+        (TextStyle::Button, FontId::new(12.0, Proportional)),
+        (TextStyle::Small, FontId::new(8.0, Proportional)),
+    ]
+    .into();
+    ctx.all_styles_mut(move |style| style.text_styles = text_styles.clone());
+}
 
 /// sets up the frame for the widgets
 fn set_up_frame() -> egui::Frame {
@@ -27,16 +56,16 @@ fn set_up_frame() -> egui::Frame {
 /// A custom widget for a hidden label that reveals text when clicked.
 pub fn hidden_label(ui: &mut egui::Ui, text: &str, is_revealed: &mut bool) {
     egui::Frame::none() //actually, let's test this later.. I think we don't need the frame anymore since we're not using a label now
-        .inner_margin(egui::Margin::same(5.0)) // Add padding
+        //.inner_margin(egui::Margin::same(5.0)) // Add padding
         .show(ui, |ui| {
             // Set a fixed height for the widget
-            ui.set_height(15.0);
+            //ui.set_height(15.0);
 
             // Check if the text is revealed
             if *is_revealed {
                 // Display the revealed text
                 if ui
-                    .add(egui::Button::new(egui::RichText::new(text)).frame(false))
+                    .add(egui::Button::new(egui::RichText::new(text).text_style(TextStyle::Body).color(egui::Color32::BLACK)).fill(egui::Color32::YELLOW).frame(false))
                     // Clickable blacked-out text
                     .clicked()
                 {
@@ -47,7 +76,7 @@ pub fn hidden_label(ui: &mut egui::Ui, text: &str, is_revealed: &mut bool) {
                 if ui
                     .add(
                         egui::Button::new(
-                            egui::RichText::new(text).color(egui::Color32::from_rgb(0, 0, 0)),
+                            egui::RichText::new(text).color(egui::Color32::from_rgb(0, 0, 0)).text_style(TextStyle::Body),
                         )
                         .fill(egui::Color32::from_rgb(0, 0, 0))
                         .frame(false),
@@ -80,7 +109,7 @@ pub fn label_textbox_question(
 
             // Set a yellow line around the textboxes as they are not yet answered
             ui.style_mut().visuals.widgets.inactive.bg_stroke =
-                egui::Stroke::new(1.0, egui::Color32::YELLOW);
+                egui::Stroke::new(1.0, egui::Color32::from_rgb(253, 218, 13));
 
             // Go through each section of the line
             for section in sections {
@@ -94,7 +123,8 @@ pub fn label_textbox_question(
                     if (*answer_index as usize) < answers.len() {
                         ui.add(
                             egui::TextEdit::singleline(&mut answers[*answer_index as usize])
-                                .desired_width((answer_length * TEXTBOX_WIDTH) as f32), //7 too small
+                                .desired_width((answer_length * TEXTBOX_WIDTH) as f32)
+                                .char_limit(answer_length),
                         );
                         *answer_index += 1;
                     } else {
@@ -238,6 +268,7 @@ pub fn label_ops_data(
     _answers: &mut [String],
     answer_index: &mut i32,
     correct_answers: &mut [String],
+    answers_displayed: &mut [bool],
 ) {
     // Create a frame for the widget to go around the line
     let frame = set_up_frame();
@@ -258,10 +289,15 @@ pub fn label_ops_data(
 
                     // Check if the answer index is within the bounds of the answers vector, and if so, create a textbox for the answer and outline if it's correct or not
                     if (*answer_index as usize) < correct_answers.len() {
-                        ui.add(egui::Label::new(format!(
-                            " * {} * ",
-                            correct_answers[*answer_index as usize]
-                        )));
+                        //ui.add(egui::Label::new(format!(
+                        //    " * {} * ",
+                        //    correct_answers[*answer_index as usize]
+                        //)));
+                        hidden_label(
+                            ui,
+                            &format!(" * {} * ", correct_answers[*answer_index as usize]),
+                            &mut answers_displayed[*answer_index as usize],
+                        );
                         *answer_index += 1;
                     }
                 // No dollar sign, so just display the section as a label
